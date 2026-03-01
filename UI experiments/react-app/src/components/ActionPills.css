@@ -1,0 +1,92 @@
+.action-pills {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-panel);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  z-index: 50;
+  animation: slideInRight 0.4s ease-out;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--pill-color), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.pill:hover::before {
+  opacity: 0.1;
+}
+
+.pill:hover {
+  border-color: var(--pill-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.pill svg {
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s;
+}
+
+.pill span {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.pill:hover svg,
+.pill:hover span {
+  color: var(--pill-color);
+}
+
+.pill:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 1024px) {
+  .action-pills {
+    flex-wrap: wrap;
+    max-width: calc(100vw - 40px);
+    justify-content: center;
+  }
+
+  .pill span {
+    display: none;
+  }
+
+  .pill {
+    padding: 12px;
+  }
+}

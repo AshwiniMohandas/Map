@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Sidebar from './components/Sidebar'
 import MainMenu from './components/MainMenu'
@@ -9,9 +10,12 @@ import MapSelection from './components/MapSelection'
 import Notification from './components/Notification'
 import PastProjects from './components/PastProjects'
 import PastRoutes from './components/PastRoutes'
+import MapView3D from './components/MapView3D'
 import './App.css'
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [currentView, setCurrentView] = useState('menu')
   const [currentProject, setCurrentProject] = useState(null)
   const [setupData, setSetupData] = useState({
@@ -55,10 +59,10 @@ function App() {
 
   const handleViewProject = (project) => {
     setCurrentProject(project)
-    // Store project data in localStorage for 3d-map-app to access
+    // Store project data in localStorage for 3D map view to access
     localStorage.setItem('currentProject', JSON.stringify(project))
-    // Navigate to 3d-map-app
-    window.open('http://localhost:5174/', '_blank')
+    // Navigate to 3D map view
+    navigate('/map-view')
   }
 
   const handleSetupComplete = (data) => {
@@ -99,9 +103,9 @@ function App() {
 
     setCurrentProject(updatedProject)
 
-    // Navigate to 3d-map-app
+    // Navigate to 3D map view
     localStorage.setItem('currentProject', JSON.stringify(updatedProject))
-    window.open('http://localhost:5174/', '_blank')
+    navigate('/map-view')
 
     // Return to project list
     setCurrentView('projectList')
@@ -149,92 +153,110 @@ function App() {
     setCurrentView('projects')
   }
 
+  // Check if we're on the 3D map view route
+  const isMapView = location.pathname === '/map-view'
+
   return (
     <div className="app">
-      <Sidebar
-        currentView={currentView}
-        onViewProjects={handleViewProjects}
-        onBackToMenu={handleBackToMenu}
-      />
+      {!isMapView && (
+        <Sidebar
+          currentView={currentView}
+          onViewProjects={handleViewProjects}
+          onBackToMenu={handleBackToMenu}
+        />
+      )}
 
       <main className="main-content">
-        <AnimatePresence mode="wait">
-          {currentView === 'menu' && (
-            <MainMenu
-              key="menu"
-              onStartTransmission={handleStartTransmission}
-            />
-          )}
+        <Routes>
+          <Route path="/map-view" element={<MapView3D />} />
+          <Route path="*" element={
+            <AnimatePresence mode="wait">
+              {currentView === 'menu' && (
+                <MainMenu
+                  key="menu"
+                  onStartTransmission={handleStartTransmission}
+                />
+              )}
 
-          {currentView === 'projectList' && (
-            <ProjectList
-              key="projectList"
-              onNewProject={handleNewProject}
-              onViewProject={handleViewProject}
-              onBack={handleBackToMenu}
-            />
-          )}
+              {currentView === 'projectList' && (
+                <ProjectList
+                  key="projectList"
+                  onNewProject={handleNewProject}
+                  onViewProject={handleViewProject}
+                  onBack={handleBackToMenu}
+                />
+              )}
 
-          {currentView === 'projectSetup' && (
-            <ProjectSetup
-              key="projectSetup"
-              onComplete={handleProjectSetupComplete}
-              onBack={() => setCurrentView('projectList')}
-            />
-          )}
+              {currentView === 'projectSetup' && (
+                <ProjectSetup
+                  key="projectSetup"
+                  onComplete={handleProjectSetupComplete}
+                  onBack={() => setCurrentView('projectList')}
+                />
+              )}
 
-          {currentView === 'scenarioSetup' && (
-            <TransmissionSetup
-              key="scenarioSetup"
-              onComplete={handleSetupComplete}
-              onBack={() => setCurrentView('projectList')}
-            />
-          )}
+              {currentView === 'scenarioSetup' && (
+                <TransmissionSetup
+                  key="scenarioSetup"
+                  onComplete={handleSetupComplete}
+                  onBack={() => setCurrentView('projectList')}
+                />
+              )}
 
-          {currentView === 'transmission' && (
-            <TransmissionSetup
-              key="transmission"
-              onComplete={handleSetupComplete}
-              onBack={handleBackToMenu}
-            />
-          )}
+              {currentView === 'transmission' && (
+                <TransmissionSetup
+                  key="transmission"
+                  onComplete={handleSetupComplete}
+                  onBack={handleBackToMenu}
+                />
+              )}
 
-          {currentView === 'map' && (
-            <MapSelection
-              key="map"
-              onSubmit={handleRouteSubmit}
-              onBack={() => setCurrentView('transmission')}
-            />
-          )}
+              {currentView === 'map' && (
+                <MapSelection
+                  key="map"
+                  onSubmit={handleRouteSubmit}
+                  onBack={() => setCurrentView('transmission')}
+                />
+              )}
 
-          {currentView === 'notification' && (
-            <Notification
-              key="notification"
-              submissionId={submissionId}
-              onViewRoutes={handleViewRoutes}
-              onBackToMenu={handleBackToMenu}
-            />
-          )}
+              {currentView === 'notification' && (
+                <Notification
+                  key="notification"
+                  submissionId={submissionId}
+                  onViewRoutes={handleViewRoutes}
+                  onBackToMenu={handleBackToMenu}
+                />
+              )}
 
-          {currentView === 'projects' && (
-            <PastProjects
-              key="projects"
-              onSelectTransmission={handleViewRoutes}
-              onBack={handleBackToMenu}
-            />
-          )}
+              {currentView === 'projects' && (
+                <PastProjects
+                  key="projects"
+                  onSelectTransmission={handleViewRoutes}
+                  onBack={handleBackToMenu}
+                />
+              )}
 
-          {currentView === 'routes' && (
-            <PastRoutes
-              key="routes"
-              routes={routes}
-              onDeleteRoute={(id) => setRoutes(routes.filter(r => r.id !== id))}
-              onBack={handleBackToProjects}
-            />
-          )}
-        </AnimatePresence>
+              {currentView === 'routes' && (
+                <PastRoutes
+                  key="routes"
+                  routes={routes}
+                  onDeleteRoute={(id) => setRoutes(routes.filter(r => r.id !== id))}
+                  onBack={handleBackToProjects}
+                />
+              )}
+            </AnimatePresence>
+          } />
+        </Routes>
       </main>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   )
 }
 

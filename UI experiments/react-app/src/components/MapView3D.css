@@ -1,0 +1,42 @@
+.map-view-container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+  overflow: hidden;
+}
+
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.left-panel {
+  position: absolute;
+  left: 20px;
+  top: 80px;
+  width: 320px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.right-panel {
+  position: absolute;
+  right: 20px;
+  top: 80px;
+  width: 380px;
+  height: calc(100vh - 100px);
+  z-index: 10;
+}
+
+.glass-panel {
+  background: rgba(20, 20, 35, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
