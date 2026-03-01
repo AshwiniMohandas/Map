@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Planning Application</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Grid Planning Application</h1>
+            <nav>
+                <button id="viewPastRoutes" class="nav-button">View Past Routes</button>
+            </nav>
+        </header>
+
+        <!-- Main Menu -->
+        <div id="mainMenu" class="screen active">
+            <h2>Select an Option</h2>
+            <div class="options-grid">
+                <div class="option-card" data-option="transmission">
+                    <h3>Transmission Line Routing</h3>
+                    <p>Plan optimal routes for transmission lines</p>
+                </div>
+                <div class="option-card" data-option="substation">
+                    <h3>Substation Siting</h3>
+                    <p>Identify optimal locations for substations</p>
+                </div>
+                <div class="option-card" data-option="custom">
+                    <h3>Add Your Case</h3>
+                    <p>Create a custom planning scenario</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transmission Line Routing Setup -->
+        <div id="transmissionSetup" class="screen">
+            <button class="back-button">← Back to Main Menu</button>
+            <h2>Transmission Line Routing Setup</h2>
+
+            <div class="progress-steps">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Algorithm</span>
+                </div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Cost Parameters</span>
+                </div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Data Layers</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Choose Algorithm -->
+            <div id="step1" class="setup-step active">
+                <h3>Step 1: Choose Algorithm</h3>
+                <div class="algorithm-options">
+                    <label class="radio-card">
+                        <input type="radio" name="algorithm" value="default" checked>
+                        <div class="card-content">
+                            <h4>Default Algorithm</h4>
+                            <p>Use the standard routing algorithm</p>
+                        </div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="algorithm" value="custom">
+                        <div class="card-content">
+                            <h4>Create New Heuristic</h4>
+                            <p>Define your own routing heuristic</p>
+                        </div>
+                    </label>
+                </div>
+                <div id="customHeuristic" class="custom-input hidden">
+                    <label for="heuristicName">Heuristic Name:</label>
+                    <input type="text" id="heuristicName" placeholder="Enter heuristic name">
+                    <label for="heuristicDescription">Description:</label>
+                    <textarea id="heuristicDescription" placeholder="Describe your heuristic approach"></textarea>
+                </div>
+                <button class="btn-primary next-step">Next</button>
+            </div>
+
+            <!-- Step 2: Cost Parameters -->
+            <div id="step2" class="setup-step">
+                <h3>Step 2: Choose Cost Parameters</h3>
+                <div class="cost-parameters">
+                    <div class="parameter-group">
+                        <label>
+                            <input type="checkbox" name="cost" value="distance" checked>
+                            Distance ($/km)
+                        </label>
+                        <input type="number" class="parameter-value" value="1000" min="0">
+                    </div>
+                    <div class="parameter-group">
+                        <label>
+                            <input type="checkbox" name="cost" value="terrain">
+                            Terrain Difficulty
+                        </label>
+                        <input type="number" class="parameter-value" value="500" min="0">
+                    </div>
+                    <div class="parameter-group">
+                        <label>
+                            <input type="checkbox" name="cost" value="environmental">
+                            Environmental Impact
+                        </label>
+                        <input type="number" class="parameter-value" value="750" min="0">
+                    </div>
+                    <div class="parameter-group">
+                        <label>
+                            <input type="checkbox" name="cost" value="land">
+                            Land Acquisition
+                        </label>
+                        <input type="number" class="parameter-value" value="1500" min="0">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary prev-step">Previous</button>
+                    <button class="btn-primary next-step">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Data Layers -->
+            <div id="step3" class="setup-step">
+                <h3>Step 3: Choose Data Layers</h3>
+                <div class="data-layers">
+                    <label class="layer-checkbox">
+                        <input type="checkbox" name="layer" value="elevation" checked>
+                        <span>Elevation Data</span>
+                    </label>
+                    <label class="layer-checkbox">
+                        <input type="checkbox" name="layer" value="landuse" checked>
+                        <span>Land Use</span>
+                    </label>
+                    <label class="layer-checkbox">
+                        <input type="checkbox" name="layer" value="protected">
+                        <span>Protected Areas</span>
+                    </label>
+                    <label class="layer-checkbox">
+                        <input type="checkbox" name="layer" value="infrastructure">
+                        <span>Existing Infrastructure</span>
+                    </label>
+                    <label class="layer-checkbox">
+                        <input type="checkbox" name="layer" value="population">
+                        <span>Population Density</span>
+                    </label>
+                    <label class="layer-checkbox">
+                        <input type="checkbox" name="layer" value="vegetation">
+                        <span>Vegetation Cover</span>
+                    </label>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary prev-step">Previous</button>
+                    <button class="btn-primary" id="proceedToMap">Proceed to Map</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Selection -->
+        <div id="mapSelection" class="screen">
+            <button class="back-button">← Back to Setup</button>
+            <h2>Select Start and End Points</h2>
+            <div class="map-container">
+                <div id="map">
+                    <div class="map-instructions">
+                        <p>Click on the map to set your start point, then click again to set your end point.</p>
+                        <div class="point-status">
+                            <span id="startStatus">Start Point: Not Set</span>
+                            <span id="endStatus">End Point: Not Set</span>
+                        </div>
+                    </div>
+                    <canvas id="mapCanvas"></canvas>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" id="resetPoints">Reset Points</button>
+                <button class="btn-primary" id="submitRoute" disabled>Submit for Analysis</button>
+            </div>
+        </div>
+
+        <!-- Notification Screen -->
+        <div id="notification" class="screen">
+            <div class="notification-content">
+                <div class="success-icon">✓</div>
+                <h2>Route Analysis Submitted</h2>
+                <p>You will be notified once the results are available.</p>
+                <p class="submission-id">Submission ID: <span id="submissionId"></span></p>
+                <div class="button-group">
+                    <button class="btn-secondary" id="backToMenu">Back to Main Menu</button>
+                    <button class="btn-primary" id="viewRoutes">View Past Routes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Past Routes -->
+        <div id="pastRoutes" class="screen">
+            <button class="back-button">← Back to Main Menu</button>
+            <h2>Past Generated Routes</h2>
+            <div class="filters">
+                <input type="text" id="searchRoutes" placeholder="Search routes...">
+                <select id="filterStatus">
+                    <option value="all">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="processing">Processing</option>
+                    <option value="failed">Failed</option>
+                </select>
+            </div>
+            <div id="routesList" class="routes-list">
+                <!-- Routes will be dynamically added here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

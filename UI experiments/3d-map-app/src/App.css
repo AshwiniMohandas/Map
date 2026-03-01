@@ -1,0 +1,68 @@
+.app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+.canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Panels */
+.left-panel {
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  width: 380px;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  z-index: 10;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.right-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 420px;
+  height: calc(100vh - 100px);
+  z-index: 10;
+  animation: slideInRight 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .left-panel {
+    width: 340px;
+  }
+
+  .right-panel {
+    width: 380px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .left-panel,
+  .right-panel {
+    width: 100%;
+    max-width: 420px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .right-panel {
+    top: auto;
+    bottom: 20px;
+    height: 50vh;
+  }
+}
