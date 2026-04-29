@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dryft - Reliability for the Grid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #FDFCFC;
+      color: #264AFF;
+      background-image: url(https://framerusercontent.com/images/qBN8aOrvBxJY1psOPRzjUkKOQc.png);
+      background-size: 500px;
+      background-repeat: repeat;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: rgba(38, 74, 255, 0.2); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f0f0f0; }
+    ::-webkit-scrollbar-thumb { background: #264AFF; border-radius: 4px; }
+
+    /* Navigation */
+    .nav {
+      position: fixed; top: 0; width: 100%; z-index: 50;
+      background-color: transparent;
+      background-image: url(https://framerusercontent.com/images/qBN8aOrvBxJY1psOPRzjUkKOQc.png);
+      background-size: 500px; background-repeat: repeat;
+    }
+    .nav-container {
+      max-width: 1800px; margin: 0 auto; padding: 0 2.5rem;
+      height: 64px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.4em; text-transform: uppercase; color: #000;
+    }
+    .nav-right { display: flex; align-items: center; gap: 3rem; }
+    .nav-links { display: none; align-items: center; gap: 2rem; }
+    @media (min-width: 768px) { .nav-links { display: flex; } }
+    .nav-link {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 400;
+      letter-spacing: 0.15em; text-transform: uppercase; color: #000;
+      text-decoration: none; transition: opacity 0.2s;
+    }
+    .nav-link:hover { opacity: 0.6; }
+    .btn-nav {
+      padding: 0.5rem 1rem; border-radius: 9999px; border: 1px solid #000;
+      background: transparent; font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 400; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #000; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-nav:hover { background: #000; color: #fff; }
+
+    /* Interactive Visualization Section */
+    .interactive-viz {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      overflow: visible; background: #0a0a0f;
+    }
+    #towerCanvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1;
+    }
+    .viz-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: none; z-index: 2; pointer-events: none;
+    }
+    .viz-content {
+      position: relative; z-index: 3; text-align: center; width: 100%;
+      padding: 1rem 2rem 2rem;
+      background: linear-gradient(to top, rgba(10, 10, 15, 1) 0%, rgba(10, 10, 15, 0.95) 40%, rgba(10, 10, 15, 0.7) 70%, transparent 100%);
+      margin-top: auto;
+    }
+    .viz-content h1 {
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 800; line-height: 1.1;
+      margin-bottom: 0.35rem;
+      background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+    .viz-subtitle {
+      font-size: 0.85rem; color: #a0a0b0; max-width: 600px;
+      margin: 0 auto 0.75rem; line-height: 1.4; font-family: 'Inter', sans-serif;
+    }
+    .viz-stats { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
+    .viz-stat { display: flex; flex-direction: column; align-items: center; }
+    .viz-stat-value {
+      font-size: 1.5rem; font-weight: 800;
+      background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+    .viz-stat-label {
+      font-size: 0.7rem; color: #a0a0b0; text-transform: uppercase;
+      letter-spacing: 0.1em; font-family: 'Inter', sans-serif;
+    }
+
+    /* Hero Section */
+    .hero { padding: 6rem 1.5rem 8rem; }
+    @media (min-width: 1024px) { .hero { padding: 6rem 3rem 8rem; } }
+    .hero-container { max-width: 80rem; margin: 0 auto; display: grid; gap: 4rem; align-items: center; }
+    @media (min-width: 1024px) { .hero-container { grid-template-columns: 1fr 1fr; } }
+    .hero h1 { font-family: 'DM Sans', sans-serif; font-size: 2.5rem; font-weight: 500; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 b i { font-weight: 700; font-style: italic; }
+    .hero-text { font-size: 1.125rem; color: rgba(38, 74, 255, 0.7); margin-bottom: 2rem; max-width: 32rem; line-height: 1.7; }
+    .hero-buttons { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .btn-primary {
+      padding: 0.75rem 1.5rem; background: #264AFF; color: #fff; font-weight: 500;
+      border-radius: 0.5rem; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #1a3ad4; }
+    .btn-secondary {
+      padding: 0.75rem 1.5rem; border: 1px solid rgba(38, 74, 255, 0.3); color: #264AFF;
+      font-weight: 500; border-radius: 0.5rem; background: transparent; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(38, 74, 255, 0.1); }
+
+    /* Terminal Demo */
+    .terminal-wrapper { position: relative; }
+    .terminal-bg {
+      position: absolute; inset: 0; border-radius: 0.75rem; overflow: hidden;
+      background-image: url(https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop);
+      background-size: cover; background-position: center; filter: brightness(0.3);
+    }
+    .terminal {
+      position: relative; z-index: 10; background: rgba(245, 245, 245, 0.9);
+      backdrop-filter: blur(8px); border: 1px solid rgba(38, 74, 255, 0.2);
+      border-radius: 0.5rem; overflow: hidden; font-family: 'IBM Plex Mono', monospace; font-size: 0.875rem;
+    }
+    .terminal-header {
+      background: #EEEEF0; padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(38, 74, 255, 0.2);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .terminal-dot.red { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green { background: #28c840; }
+    .terminal-title { margin-left: 1rem; font-size: 0.75rem; color: rgba(38, 74, 255, 0.5); }
+    .terminal-content { padding: 1.5rem; min-height: 300px; }
+    .terminal-line { margin-bottom: 0.75rem; opacity: 0; animation: fadeIn 0.3s ease forwards; }
+    .terminal-line.system { color: rgba(38, 74, 255, 0.5); }
+    .terminal-line.success { color: #22C55E; margin-left: 0.5rem; display: inline; }
+    .terminal-line.ai-label { color: rgba(38, 74, 255, 0.6); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .terminal-line.ai { color: #264AFF; }
+    .terminal-line.action { color: #22C55E; display: flex; align-items: center; gap: 0.5rem; }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    /* Manifesto Section */
+    .manifesto { padding: 8rem 1.5rem; border-top: 1px solid rgba(38, 74, 255, 0.2); }
+    @media (min-width: 1024px) { .manifesto { padding: 8rem 3rem; } }
+    .manifesto-container { max-width: 56rem; margin: 0 auto; }
+    .section-label {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: 0.15em; text-transform: uppercase; color: #264AFF;
+    }
+    .section-label-line { width: 3rem; height: 1px; background: #264AFF; }
+    .manifesto h2 { font-size: 1.875rem; font-weight: 600; line-height: 1.2; margin-bottom: 2rem; }
+    @media (min-width: 640px) { .manifesto h2 { font-size: 2.25rem; } }
+    @media (min-width: 1024px) { .manifesto h2 { font-size: 3rem; } }
+    .manifesto-text { font-size: 1.125rem; color: rgba(38, 74, 255, 0.8); line-height: 1.7; }
+    .manifesto-text p { margin-bottom: 1.5rem; }
+
+    /* Agents Section */
+    .agents { padding: 4rem 1.5rem; background: rgba(38, 74, 255, 0.95); color: #fff; }
+    @media (min-width: 1024px) { .agents { padding: 4rem 3rem; } }
+    .agents-container { max-width: 72rem; margin: 0 auto; display: grid; gap: 3rem; }
+    @media (min-width: 1024px) { .agents-container { grid-template-columns: 1fr 1fr; } }
+    .agents-left { display: flex; flex-direction: column; }
+    .module-section { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; padding: 4rem 0; transition: opacity 0.5s; }
+    .module-section.inactive { opacity: 0.3; }
+    .module-label {
+      display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255, 255, 255, 0.8);
+    }
+    .module-dot { width: 10px; height: 10px; background: #fff; border-radius: 2px; }
+    .module-title { font-size: 2.5rem; font-weight: 600; font-style: italic; text-transform: uppercase; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+    @media (min-width: 640px) { .module-title { font-size: 3rem; } }
+    @media (min-width: 1024px) { .module-title { font-size: 3.75rem; } }
+    .module-text { font-size: 1.25rem; font-weight: 500; line-height: 1.4; text-transform: uppercase; max-width: 28rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 2rem; }
+    .module-stats { padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.3); }
+    .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; }
+    .stat-label { color: rgba(255, 255, 255, 0.6); }
+    .stat-value { color: #fff; font-weight: 700; }
+    .agents-right { display: none; position: sticky; top: 8rem; height: 60vh; }
+    @media (min-width: 1024px) { .agents-right { display: block; } }
+    .sticky-image-container { position: relative; width: 100%; height: 100%; border-radius: 0.75rem; overflow: hidden; }
+    .sticky-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.7s; }
+    .sticky-image.hidden { opacity: 0; }
+    .image-label { position: absolute; bottom: 1rem; left: 1rem; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); padding: 0.5rem 1rem; border-radius: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #fff; }
+
+    /* Solutions Section */
+    .solutions { position: relative; padding: 8rem 1.5rem; }
+    @media (min-width: 1024px) { .solutions { padding: 8rem 6rem; } }
+    .ascii-bg { position: absolute; inset: 0; overflow: hidden; opacity: 0.1; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+    .ascii-art { font-family: 'Fragment Mono', monospace; font-size: 6px; color: #264AFF; white-space: pre; line-height: 1; }
+    @media (min-width: 640px) { .ascii-art { font-size: 8px; } }
+    @media (min-width: 768px) { .ascii-art { font-size: 10px; } }
+    .solutions-container { position: relative; z-index: 10; max-width: 72rem; margin: 0 auto; display: grid; gap: 6rem; }
+    @media (min-width: 1024px) { .solutions-container { grid-template-columns: 1fr 1fr; align-items: start; } }
+    .solutions-left h2 { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #264AFF; margin-bottom: 3rem; }
+    .solutions-left h3 { font-size: 3rem; font-weight: 900; letter-spacing: -0.02em; color: #264AFF; }
+    @media (min-width: 768px) { .solutions-left h3 { font-size: 4.5rem; } }
+    .solutions-right { display: flex; flex-direction: column; gap: 4rem; }
+    .solution-item h4 { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(38, 74, 255, 0.4); margin-bottom: 1rem; }
+    .solution-item p { font-size: 1.5rem; font-weight: 700; color: #264AFF; }
+
+    /* Hiring Section */
+    .hiring { padding: 6rem 1.5rem; border-top: 1px solid rgba(38, 74, 255, 0.2); }
+    @media (min-width: 1024px) { .hiring { padding: 6rem 3rem; } }
+    .hiring-container { max-width: 48rem; margin: 0 auto; text-align: center; }
+    .hiring-label { font-size: 0.75rem; font-weight: 500; color: rgba(38, 74, 255, 0.6); letter-spacing: 0.1em; text-transform: uppercase; }
+    .hiring h2 { font-size: 2.5rem; font-weight: 600; margin-top: 1rem; margin-bottom: 1.5rem; }
+    @media (min-width: 1024px) { .hiring h2 { font-size: 3rem; } }
+    .hiring-text { font-size: 1.125rem; color: rgba(38, 74, 255, 0.7); max-width: 36rem; margin: 0 auto 2rem; line-height: 1.7; }
+    .btn-careers { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: #264AFF; color: #fff; font-weight: 500; border-radius: 0.5rem; text-decoration: none; transition: background 0.2s; }
+    .btn-careers:hover { background: #1a3ad4; }
+
+    /* CTA Section */
+    .cta { padding: 8rem 1.5rem; border-top: 1px solid rgba(38, 74, 255, 0.2); }
+    @media (min-width: 1024px) { .cta { padding: 8rem 3rem; } }
+    .cta-container { max-width: 48rem; margin: 0 auto; text-align: center; }
+    .cta-subtitle { font-size: 1.5rem; color: rgba(38, 74, 255, 0.5); margin-bottom: 0.5rem; }
+    .cta h2 { font-size: 3rem; font-weight: 600; letter-spacing: -0.02em; }
+    @media (min-width: 1024px) { .cta h2 { font-size: 3.75rem; } }
+    .btn-cta { display: inline-block; margin-top: 2.5rem; padding: 1rem 2rem; border: 1px solid #264AFF; color: #264AFF; font-weight: 500; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s; }
+    .btn-cta:hover { background: #264AFF; color: #fff; }
+
+    /* Footer */
+    .footer { padding: 4rem 1.5rem; border-top: 1px solid rgba(38, 74, 255, 0.2); }
+    @media (min-width: 1024px) { .footer { padding: 4rem 3rem; } }
+    .footer-container { max-width: 80rem; margin: 0 auto; display: grid; gap: 3rem; }
+    @media (min-width: 768px) { .footer-container { grid-template-columns: repeat(3, 1fr); } }
+    .footer-logo { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+    .footer-section h4 { font-size: 0.75rem; font-weight: 500; color: #888; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.5rem; }
+    .footer-section a { display: block; font-size: 0.875rem; color: rgba(38, 74, 255, 0.6); text-decoration: none; margin-bottom: 0.75rem; transition: color 0.2s; }
+    .footer-section a:hover { color: #264AFF; }
+    .footer-bottom { max-width: 80rem; margin: 4rem auto 0; padding-top: 2rem; border-top: 1px solid rgba(38, 74, 255, 0.2); text-align: center; }
+    .footer-bottom p { font-size: 0.875rem; color: rgba(38, 74, 255, 0.5); }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-container">
+      <div class="logo">LOGO</div>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="#manifesto" class="nav-link">Manifesto</a>
+          <a href="#team" class="nav-link">Team</a>
+          <a href="#blog" class="nav-link">Blog</a>
+          <a href="#careers" class="nav-link">Careers</a>
+        </div>
+        <button class="btn-nav">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Interactive Visualization Section -->
+  <section class="interactive-viz">
+    <canvas id="towerCanvas"></canvas>
+    <div class="viz-overlay"></div>
+    <div class="viz-content">
+      <h1>The AI-Native Engineering Platform for Power Infrastructure</h1>
+      <p class="viz-subtitle">Accelerate infrastructure engineering with physics-informed machine learning. Design, optimize, and validate power infrastructure in hours, not months.</p>
+      <div class="viz-stats">
+        <div class="viz-stat"><span class="viz-stat-value">100x</span><span class="viz-stat-label">Faster Design</span></div>
+        <div class="viz-stat"><span class="viz-stat-value">40%</span><span class="viz-stat-label">Cost Reduction</span></div>
+        <div class="viz-stat"><span class="viz-stat-value">99.9%</span><span class="viz-stat-label">Accuracy</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div>
+        <h1>Reliability for the <b><i>Grid</i></b>. <br>Power for <b><i>Data Centers</i></b>.</h1>
+        <p class="hero-text">We provide the agentic intelligence to plan energy infrastructure and orchestrate the power demands of data center. Decision science for the new energy era</p>
+        <div class="hero-buttons">
+          <button class="btn-primary"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Watch Video</button>
+          <button class="btn-secondary">Request Demo</button>
+        </div>
+      </div>
+      <div class="terminal-wrapper">
+        <div class="terminal-bg"></div>
+        <div class="terminal">
+          <div class="terminal-header">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+            <span class="terminal-title">hugo-terminal</span>
+          </div>
+          <div class="terminal-content" id="terminal-content"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Manifesto Section -->
+  <section id="manifesto" class="manifesto">
+    <div class="manifesto-container">
+      <span class="section-label"><span class="section-label-line"></span>Manifesto</span>
+      <h2>The grid is evolving. So must the tools that build it.</h2>
+      <div class="manifesto-text">
+        <p>For decades, infrastructure planning has relied on manual processes, static models, and siloed expertise. Engineers spend months on feasibility studies. Utilities struggle to keep pace with renewable integration. Data centers face power constraints that limit growth.</p>
+        <p>We believe there's a better way. By combining agentic AI with deep domain expertise, we can compress planning cycles from months to days, optimize layouts that humans would never discover, and orchestrate power flows in real-time.</p>
+        <p>This isn't about replacing engineers—it's about amplifying them. Giving them tools that handle the combinatorial complexity so they can focus on what matters: building reliable, sustainable infrastructure for the next century.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agents Section -->
+  <section id="agents" class="agents">
+    <div class="agents-container">
+      <div class="agents-left">
+        <div class="module-section" id="module-0" data-index="0">
+          <div class="module-label"><span class="module-dot"></span>Module_01: Plan</div>
+          <h2 class="module-title">Automate Layouts.</h2>
+          <p class="module-text">Automate transmission and solar layouts to reduce CAPEX. Our agents iterate through thousands of topology scenarios in seconds.</p>
+          <div class="module-stats">
+            <div class="stat-row"><span class="stat-label">Topology_Optimization</span><span class="stat-value">Active_v4.2</span></div>
+            <div class="stat-row"><span class="stat-label">CAPEX_Alpha_Target</span><span class="stat-value">15.4% Reduction</span></div>
+          </div>
+        </div>
+        <div class="module-section inactive" id="module-1" data-index="1">
+          <div class="module-label"><span class="module-dot"></span>Module_02: Orchestrate</div>
+          <h2 class="module-title">Maximize Density.</h2>
+          <p class="module-text">Balance data center power in real-time. We eliminate stranded capacity by orchestrating loads against grid volatility.</p>
+          <div class="module-stats">
+            <div class="stat-row"><span class="stat-label">Real_Time_Balancing</span><span class="stat-value">Synchronized</span></div>
+            <div class="stat-row"><span class="stat-label">Latency_Response</span><span class="stat-value">< 12MS</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="agents-right">
+        <div class="sticky-image-container">
+          <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop" alt="Plan" class="sticky-image" id="image-0">
+          <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop" alt="Orchestrate" class="sticky-image hidden" id="image-1">
+          <div class="image-label" id="image-label">Module_01: Plan</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solutions Section -->
+  <section id="solutions" class="solutions">
+    <div class="ascii-bg"><pre class="ascii-art">
+                                         .::---:::.
+                                   .:=+*##%%%%%%%##*+=:.
+                               .:+#%%%%%%%%%%%%%%%%%%%##*=:.
+                            .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*=.
+                         .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%###*=.
+                       :+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*:
+                     :*#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:
+                   .+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%+.
+                  :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+                 =#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+                +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*
+               +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+
+              =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+             :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+             *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+            :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+            =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=
+            *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+           .#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#.
+           .%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+           .%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+           .%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+            *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+            =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=
+            :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+             *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+             :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+              =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+               +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+
+                +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*
+                 =#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+                  :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+                   .+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%+.
+                     :*#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:
+                       :+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*:
+                         .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%###*=.
+                            .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*=.
+                               .:+#%%%%%%%%%%%%%%%%%%%##*=:.
+                                   .:=+*##%%%%%%%##*+=:.
+                                         .::---:::.
+    </pre></div>
+    <div class="solutions-container">
+      <div class="solutions-left">
+        <span class="section-label"><span class="section-label-line"></span>Solutions</span>
+        <h2>01 // The Engine</h2>
+        <h3>Math over <br>Marketing.</h3>
+      </div>
+      <div class="solutions-right">
+        <div class="solution-item"><h4>L-SITE // PV & SUBSTATION</h4><p>Autonomous siting that respects terrain physics. Not just a layout—a calculated yield maximum.</p></div>
+        <div class="solution-item"><h4>T-ROUTE // TRANSMISSION</h4><p>Generative pathing across multi-layer resistance grids. Reducing T&D losses by computing every possible path in milliseconds.</p></div>
+        <div class="solution-item"><h4>TWIN-SYNC // ORCHESTRATION</h4><p>The brain for the Data Center. Physics-based simulation that handles millisecond-level load fluctuations with stochastic integrity.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hiring Section -->
+  <section id="careers" class="hiring">
+    <div class="hiring-container">
+      <span class="hiring-label">Join the Team</span>
+      <h2>We're Hiring</h2>
+      <p class="hiring-text">We're looking for people with a sense of urgency and outstanding taste for great products. Our team has built everything from robots and PCBs to software with millions of downloads.</p>
+      <a href="#careers" class="btn-careers">View Careers<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="cta-container">
+      <p class="cta-subtitle">Your ERP doesn't think,</p>
+      <h2>Dryft does.</h2>
+      <a href="mailto:hello@dryft.ai" class="btn-cta">Get In Touch</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div><span class="footer-logo">dryft</span></div>
+      <div class="footer-section"><h4>Find Us</h4><a href="#">LinkedIn</a><a href="#">X</a></div>
+      <div class="footer-section"><h4>Navigate</h4><a href="#">Manifesto</a><a href="#">Team</a><a href="#">Blog</a><a href="#">Careers</a><a href="#">Imprint</a><a href="#">Terms & Conditions</a></div>
+    </div>
+    <div class="footer-bottom"><p>Made with ♥ in San Francisco</p></div>
+  </footer>
+
+  <script>
+    // Terminal Animation
+    const terminalLines = [
+      { type: 'system', text: '> Connecting to ERP...' },
+      { type: 'success', text: 'success' },
+      { type: 'system', text: '> Reading data...' },
+      { type: 'divider' },
+      { type: 'ai-label', text: 'Hugo AI' },
+      { type: 'ai', text: 'We have 3 late items' },
+      { type: 'ai', text: 'Thinking...' },
+      { type: 'divider' },
+      { type: 'action', text: '✦ Follow up with suppliers' },
+      { type: 'action', text: '✦ Increase safety stock by 5' },
+    ];
+    const terminalContent = document.getElementById('terminal-content');
+    let lineIndex = 0;
+    function addTerminalLine() {
+      if (lineIndex >= terminalLines.length) return;
+      const line = terminalLines[lineIndex];
+      if (line.type === 'divider') {
+        const div = document.createElement('div');
+        div.style.height = '16px';
+        terminalContent.appendChild(div);
+      } else {
+        const div = document.createElement('div');
+        div.className = `terminal-line ${line.type}`;
+        div.textContent = line.text;
+        terminalContent.appendChild(div);
+      }
+      lineIndex++;
+      setTimeout(addTerminalLine, line.type === 'divider' ? 300 : 600);
+    }
+    setTimeout(addTerminalLine, 1000);
+
+    // Scroll-based module switching
+    const modules = document.querySelectorAll('.module-section');
+    const images = document.querySelectorAll('.sticky-image');
+    const imageLabel = document.getElementById('image-label');
+    const moduleLabels = ['Module_01: Plan', 'Module_02: Orchestrate'];
+    function handleScroll() {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      modules.forEach((module, index) => {
+        const rect = module.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const absoluteBottom = rect.bottom + window.scrollY;
+        if (scrollPosition >= absoluteTop && scrollPosition <= absoluteBottom) {
+          modules.forEach((m, i) => m.classList.toggle('inactive', i !== index));
+          images.forEach((img, i) => img.classList.toggle('hidden', i !== index));
+          if (imageLabel) imageLabel.textContent = moduleLabels[index];
+        }
+      });
+    }
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+
+    // Tower Engineering Demo
+    class TowerEngineeringDemo {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.resize();
+        this.time = 0;
+        this.cursorBlink = true;
+        this.lastCursorBlink = 0;
+        this.rotationY = 0;
+        this.rotationX = 0.3;
+        this.zoom = 1;
+        this.camera = { zoom: 1, targetZoom: 1, panX: 0, targetPanX: 0, panY: 0, targetPanY: 0, rotationSpeed: 0.006, targetRotationSpeed: 0.006 };
+        this.cameraSequence = this.getCameraSequence();
+        this.currentCameraIndex = 0;
+        this.cameraStartTime = 0;
+        this.colors = {
+          bgDark: 'rgba(12, 14, 20, 0.95)', bgPanel: 'rgba(18, 22, 32, 0.92)', bgCard: 'rgba(25, 32, 45, 0.95)',
+          borderGlow: 'rgba(6, 182, 212, 0.5)', borderMuted: 'rgba(80, 100, 130, 0.4)',
+          accentCyan: 'rgba(6, 182, 212, 1)', accentPurple: 'rgba(139, 92, 246, 1)',
+          accentGreen: 'rgba(34, 197, 94, 1)', accentYellow: 'rgba(250, 204, 21, 1)',
+          textPrimary: 'rgba(255, 255, 255, 1)', textSecondary: 'rgba(160, 170, 190, 1)', textMuted: 'rgba(100, 120, 150, 1)'
+        };
+        this.currentScreen = 'design';
+        this.params = { height: 0, targetHeight: 45, baseWidth: 0, targetBaseWidth: 8, topWidth: 0, targetTopWidth: 2, crossArmCount: 0, targetCrossArmCount: 3, voltage: 0, targetVoltage: 230, windSpeed: 0, targetWindSpeed: 45, iceThickness: 0, targetIceThickness: 12, safetyFactor: 0, targetSafetyFactor: 2.5, spanLength: 0, targetSpanLength: 350 };
+        this.towerMembers = [
+          { id: 'L1', type: 'Leg', section: 'L150x150x15', length: 12.5, qty: 4, weight: 265, material: 'S355' },
+          { id: 'L2', type: 'Leg', section: 'L130x130x12', length: 10.2, qty: 4, weight: 185, material: 'S355' },
+          { id: 'L3', type: 'Leg', section: 'L100x100x10', length: 8.8, qty: 4, weight: 118, material: 'S355' },
+          { id: 'D1', type: 'Diagonal', section: 'L75x75x6', length: 4.2, qty: 24, weight: 28, material: 'S275' },
+          { id: 'D2', type: 'Diagonal', section: 'L65x65x5', length: 3.8, qty: 32, weight: 19, material: 'S275' },
+          { id: 'H1', type: 'Horizontal', section: 'L60x60x5', length: 8.0, qty: 8, weight: 35, material: 'S275' },
+          { id: 'H2', type: 'Horizontal', section: 'L50x50x4', length: 6.5, qty: 12, weight: 22, material: 'S275' },
+          { id: 'CA1', type: 'Cross-arm', section: 'L80x80x8', length: 5.5, qty: 6, weight: 48, material: 'S355' },
+          { id: 'CA2', type: 'Cross-arm', section: 'L65x65x6', length: 4.2, qty: 6, weight: 32, material: 'S355' },
+          { id: 'P1', type: 'Peak', section: 'L70x70x6', length: 3.2, qty: 4, weight: 24, material: 'S355' }
+        ];
+        this.highlightedMember = -1;
+        this.memberAnimationProgress = 0;
+        this.bomAnimationProgress = 0;
+        this.analysisResults = { maxStress: 0, deflection: 0, utilizationRatio: 0, weight: 0, foundationLoad: 0 };
+        this.memberStresses = [];
+        this.generateMemberStresses();
+        this.chatSequence = this.getChatSequence();
+        this.displayedChatMessages = [];
+        this.lastChatPhase = '';
+        this.demoSequence = this.getDemoSequence();
+        this.currentSequenceIndex = 0;
+        this.sequenceStartTime = 0;
+        this.isAnalyzing = false;
+        this.bindEvents();
+        this.animate();
+      }
+      getChatSequence() {
+        return [
+          { phase: 'load-focus', type: 'user', text: 'Generate a 3D geometry of a 230kV transmission tower for coastal terrain ready for structural FEA.' },
+          { phase: 'height', type: 'ai', title: 'Tower Geometry Generated', bullets: ['Height: 45m (350m span clearance)', 'Base: 8m × 8m footprint', 'Top: 2m width', '3 cross-arm levels'] },
+          { phase: 'wind', type: 'ai', title: 'Load Cases Applied', bullets: ['Wind: 45 m/s coastal Category C', 'Ice: 12mm radial', 'NESC Heavy loading district'] },
+          { phase: 'analyze', type: 'ai', title: 'Structural Analysis Complete', bullets: ['Max stress: 187.5 MPa', 'Utilization: 73%', 'All members pass ✓'] },
+          { phase: 'members-focus', type: 'user', text: 'Show detailed member breakdown and generate Bill of Materials.' },
+          { phase: 'members-show', type: 'ai', title: 'Member Analysis Complete', bullets: ['Total members: 100 pieces', 'Steel grades: S275, S355', 'Total weight: 10,820 kg', 'Ready for BOM export'] },
+          { phase: 'bom-focus', type: 'user', text: 'Export the Bill of Materials with cutting list and material summary.' },
+          { phase: 'bom-show', type: 'ai', title: 'BOM Generated', bullets: ['10 unique section types', 'Cutting list prepared', 'Material summary ready', 'Export to Excel/PDF available'] }
+        ];
+      }
+      getDemoSequence() {
+        return [
+          { phase: 'init', duration: 800 }, { phase: 'load-ask', duration: 4500, focus: 'chat' }, { phase: 'load-focus', duration: 800, focus: 'chat' },
+          { phase: 'height', duration: 1200, focus: 'main' }, { phase: 'base', duration: 1000 }, { phase: 'top', duration: 800 },
+          { phase: 'crossarms', duration: 1000 }, { phase: 'voltage', duration: 800 }, { phase: 'wind', duration: 1000 },
+          { phase: 'ice', duration: 800 }, { phase: 'analyze', duration: 2000 }, { phase: 'members-ask', duration: 3500, focus: 'chat' },
+          { phase: 'members-focus', duration: 300, focus: 'chat' }, { phase: 'members-show', duration: 2500, screen: 'members', focus: 'main' },
+          { phase: 'members-calc', duration: 1500 }, { phase: 'bom-ask', duration: 3500, focus: 'chat' }, { phase: 'bom-focus', duration: 300, focus: 'chat' },
+          { phase: 'bom-show', duration: 2500, screen: 'bom', focus: 'main' }, { phase: 'complete', duration: 2000 }
+        ];
+      }
+      getCameraSequence() {
+        return [
+          { duration: 4000, zoom: 0.85, panX: 0, panY: 0, rotSpeed: 0.005, label: 'Welcome to Tower SensAI', tooltip: 'AI-powered transmission tower design' },
+          { duration: 4500, zoom: 0.95, panX: 0, panY: 40, rotSpeed: 0.003, label: 'Cross-Arm Assembly', tooltip: 'Intelligent conductor attachment points' },
+          { duration: 4000, zoom: 0.95, panX: 0, panY: -50, rotSpeed: 0.004, label: 'Base Structure', tooltip: 'Optimized steel lattice framework' },
+          { duration: 3500, zoom: 0.9, panX: 0, panY: 0, rotSpeed: 0.008, label: '360° Structural View', tooltip: 'Real-time stress visualization' },
+          { duration: 4000, zoom: 0.95, panX: 0, panY: 55, rotSpeed: 0.002, label: 'Peak Configuration', tooltip: 'Ground wire attachment point' },
+          { duration: 4000, zoom: 0.8, panX: 0, panY: 0, rotSpeed: 0.006, label: 'Full Tower Overview', tooltip: 'Complete design visualization' },
+          { duration: 3500, zoom: 0.85, panX: 0, panY: 0, rotSpeed: 0.005, label: 'Design Complete', tooltip: 'Ready for export & fabrication' }
+        ];
+      }
+      resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; this.width = this.canvas.width; this.height = this.canvas.height; }
+      bindEvents() { window.addEventListener('resize', () => this.resize()); }
+      generateMemberStresses() { this.memberStresses = []; for (let i = 0; i < 80; i++) this.memberStresses.push({ stress: Math.random() * 0.85 + 0.1, animated: false }); }
+      lerp(a, b, t) { return a + (b - a) * t; }
+      easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+      easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+      project3D(x, y, z) {
+        const cosY = Math.cos(this.rotationY), sinY = Math.sin(this.rotationY), cosX = Math.cos(this.rotationX), sinX = Math.sin(this.rotationX);
+        let x1 = x * cosY - z * sinY, z1 = x * sinY + z * cosY, y1 = y * cosX - z1 * sinX, z2 = y * sinX + z1 * cosX;
+        const fov = 500, scale = fov / (fov + z2) * this.zoom;
+        return { x: x1 * scale, y: y1 * scale, z: z2, scale };
+      }
+      updateDemo() {
+        this.updateCamera();
+        this.rotationY += this.camera.rotationSpeed;
+        if (this.currentSequenceIndex >= this.demoSequence.length) { this.currentSequenceIndex = 0; this.resetParams(); this.currentScreen = 'design'; }
+        const step = this.demoSequence[this.currentSequenceIndex];
+        const elapsed = this.time - this.sequenceStartTime;
+        const progress = Math.min(1, elapsed / step.duration);
+        const eased = this.easeOutCubic(progress);
+        this.updatePhaseParameters(step.phase, eased);
+        this.updateChat(step.phase);
+        if (progress >= 1) { this.currentSequenceIndex++; this.sequenceStartTime = this.time; }
+      }
+      updateCamera() {
+        const cam = this.cameraSequence[this.currentCameraIndex];
+        const progress = Math.min(1, (this.time - this.cameraStartTime) / cam.duration);
+        this.camera.targetZoom = cam.zoom; this.camera.targetPanX = cam.panX; this.camera.targetPanY = cam.panY; this.camera.targetRotationSpeed = cam.rotSpeed;
+        const s = 0.03;
+        this.camera.zoom += (this.camera.targetZoom - this.camera.zoom) * s;
+        this.camera.panX += (this.camera.targetPanX - this.camera.panX) * s;
+        this.camera.panY += (this.camera.targetPanY - this.camera.panY) * s;
+        this.camera.rotationSpeed += (this.camera.targetRotationSpeed - this.camera.rotationSpeed) * s;
+        if (progress >= 1) { this.currentCameraIndex = (this.currentCameraIndex + 1) % this.cameraSequence.length; this.cameraStartTime = this.time; }
+        this.zoom = this.camera.zoom;
+      }
+      updatePhaseParameters(phase, p) {
+        switch (phase) {
+          case 'height': this.params.height = this.lerp(0, this.params.targetHeight, p); break;
+          case 'base': this.params.baseWidth = this.lerp(0, this.params.targetBaseWidth, p); break;
+          case 'top': this.params.topWidth = this.lerp(0, this.params.targetTopWidth, p); break;
+          case 'crossarms': this.params.crossArmCount = Math.floor(this.lerp(0, this.params.targetCrossArmCount, p)); break;
+          case 'voltage': this.params.voltage = this.lerp(0, this.params.targetVoltage, p); break;
+          case 'wind': this.params.windSpeed = this.lerp(0, this.params.targetWindSpeed, p); break;
+          case 'ice': this.params.iceThickness = this.lerp(0, this.params.targetIceThickness, p); break;
+          case 'analyze':
+            this.isAnalyzing = true; this.analysisResults.maxStress = this.lerp(0, 187.5, p);
+            this.analysisResults.utilizationRatio = this.lerp(0, 0.73, p); this.analysisResults.weight = this.lerp(0, 10820, p);
+            this.memberStresses.forEach((m, i) => { if (p > i / this.memberStresses.length) m.animated = true; });
+            break;
+          case 'members-focus': this.currentScreen = 'members'; this.memberAnimationProgress = 0; break;
+          case 'members-show': this.currentScreen = 'members'; this.memberAnimationProgress = p; this.highlightedMember = Math.floor(p * this.towerMembers.length); break;
+          case 'members-calc': this.memberAnimationProgress = p; this.highlightedMember = Math.floor(p * this.towerMembers.length); break;
+          case 'bom-focus': this.currentScreen = 'bom'; this.bomAnimationProgress = 0; break;
+          case 'bom-show': this.currentScreen = 'bom'; this.bomAnimationProgress = p; break;
+          default: this.isAnalyzing = false;
+        }
+      }
+      updateChat(phase) {
+        if (phase !== this.lastChatPhase) {
+          const msgs = this.chatSequence.filter(m => m.phase === phase);
+          msgs.forEach(m => { if (!this.displayedChatMessages.find(x => x.phase === m.phase && x.type === m.type)) this.displayedChatMessages.push({ ...m, timestamp: this.time }); });
+          this.lastChatPhase = phase;
+          if (this.displayedChatMessages.length > 4) this.displayedChatMessages = this.displayedChatMessages.slice(-4);
+        }
+      }
+      resetParams() {
+        Object.keys(this.params).forEach(k => { if (!k.startsWith('target')) this.params[k] = 0; });
+        this.analysisResults = { maxStress: 0, deflection: 0, utilizationRatio: 0, weight: 0, foundationLoad: 0 };
+        this.isAnalyzing = false; this.memberAnimationProgress = 0; this.bomAnimationProgress = 0;
+        this.displayedChatMessages = []; this.lastChatPhase = ''; this.generateMemberStresses();
+        this.currentCameraIndex = 0; this.cameraStartTime = this.time;
+        this.camera.zoom = 1; this.camera.panX = 0; this.camera.panY = 0; this.camera.rotationSpeed = 0.006;
+      }
+      getStressColor(s) {
+        if (s < 0.5) { const t = s / 0.5; return `rgba(${Math.floor(80 + 175 * t)}, ${Math.floor(240 - 10 * t)}, ${Math.floor(120 - 60 * t)}, 1)`; }
+        else { const t = (s - 0.5) / 0.5; return `rgba(255, ${Math.floor(230 - 130 * t)}, ${Math.floor(60 + 40 * t)}, 1)`; }
+      }
+      roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+      }
+      roundRectTop(ctx, x, y, w, h, r) {
+        ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h); ctx.lineTo(x, y + h); ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+      }
+      draw3DTower(cx, cy, scale) {
+        const ctx = this.ctx, pcx = cx + this.camera.panX, pcy = cy + this.camera.panY;
+        const h = this.params.height * scale * 6, baseW = this.params.baseWidth * scale * 8, topW = this.params.topWidth * scale * 8;
+        if (h < 10) return;
+        const verts = [], levels = 12;
+        for (let i = 0; i <= levels; i++) {
+          const t = i / levels, y = -h * t, w = baseW - (baseW - topW) * t;
+          verts.push([{ x: -w / 2, y, z: -w / 2 }, { x: w / 2, y, z: -w / 2 }, { x: w / 2, y, z: w / 2 }, { x: -w / 2, y, z: w / 2 }]);
+        }
+        const proj = verts.map(lv => lv.map(v => { const p = this.project3D(v.x, v.y, v.z); return { x: pcx + p.x, y: pcy + p.y, z: p.z, scale: p.scale }; }));
+        // Horizontal braces
+        for (let i = 0; i < proj.length; i++) {
+          const lv = proj[i], st = this.memberStresses[i % this.memberStresses.length];
+          if (st.animated) { ctx.shadowColor = this.getStressColor(st.stress); ctx.shadowBlur = 4; }
+          ctx.strokeStyle = st.animated ? this.getStressColor(st.stress) : 'rgba(100, 140, 200, 0.8)'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); for (let j = 0; j < 4; j++) { ctx.moveTo(lv[j].x, lv[j].y); ctx.lineTo(lv[(j + 1) % 4].x, lv[(j + 1) % 4].y); } ctx.stroke(); ctx.shadowBlur = 0;
+        }
+        // Vertical legs
+        ctx.lineWidth = 2.5;
+        for (let j = 0; j < 4; j++) for (let i = 0; i < proj.length - 1; i++) {
+          const st = this.memberStresses[(i + j * 10) % this.memberStresses.length];
+          if (st.animated) { ctx.shadowColor = this.getStressColor(st.stress); ctx.shadowBlur = 6; }
+          ctx.strokeStyle = st.animated ? this.getStressColor(st.stress) : 'rgba(140, 180, 240, 1)';
+          ctx.beginPath(); ctx.moveTo(proj[i][j].x, proj[i][j].y); ctx.lineTo(proj[i + 1][j].x, proj[i + 1][j].y); ctx.stroke(); ctx.shadowBlur = 0;
+        }
+        // Diagonal braces
+        ctx.lineWidth = 1;
+        for (let i = 0; i < proj.length - 1; i++) for (let j = 0; j < 4; j++) {
+          const nj = (j + 1) % 4, st = this.memberStresses[(i * 4 + j) % this.memberStresses.length];
+          ctx.strokeStyle = st.animated ? this.getStressColor(st.stress) : 'rgba(80, 120, 180, 0.6)';
+          ctx.beginPath(); ctx.moveTo(proj[i][j].x, proj[i][j].y); ctx.lineTo(proj[i + 1][nj].x, proj[i + 1][nj].y); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(proj[i][nj].x, proj[i][nj].y); ctx.lineTo(proj[i + 1][j].x, proj[i + 1][j].y); ctx.stroke();
+        }
+        // Cross-arms
+        const armCnt = Math.floor(this.params.crossArmCount);
+        for (let i = 0; i < armCnt; i++) {
+          const armY = -h + 20 + i * 50, armL = 70 - i * 10;
+          const l = this.project3D(-armL, armY, 0), r = this.project3D(armL, armY, 0);
+          ctx.shadowColor = 'rgba(139, 92, 246, 0.5)'; ctx.shadowBlur = 8;
+          ctx.strokeStyle = 'rgba(180, 140, 255, 1)'; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(pcx + l.x, pcy + l.y); ctx.lineTo(pcx + r.x, pcy + r.y); ctx.stroke(); ctx.shadowBlur = 0;
+          ctx.shadowColor = 'rgba(6, 182, 212, 0.6)'; ctx.shadowBlur = 10; ctx.fillStyle = 'rgba(6, 220, 255, 1)';
+          ctx.beginPath(); ctx.arc(pcx + l.x, pcy + l.y + 12, 5, 0, Math.PI * 2); ctx.arc(pcx + r.x, pcy + r.y + 12, 5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        }
+        // Peak
+        const pk = this.project3D(0, -h - 25, 0), pkl = this.project3D(-topW * 4, -h, -topW * 4), pkr = this.project3D(topW * 4, -h, -topW * 4);
+        ctx.shadowColor = 'rgba(139, 92, 246, 0.5)'; ctx.shadowBlur = 8; ctx.strokeStyle = 'rgba(180, 140, 255, 1)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(pcx + pkl.x, pcy + pkl.y); ctx.lineTo(pcx + pk.x, pcy + pk.y); ctx.lineTo(pcx + pkr.x, pcy + pkr.y); ctx.stroke(); ctx.shadowBlur = 0;
+        // Conductors
+        if (this.params.crossArmCount >= 1) {
+          const aY = -h + 20, aL = 70;
+          ctx.shadowColor = 'rgba(250, 204, 21, 0.4)'; ctx.shadowBlur = 6; ctx.strokeStyle = 'rgba(255, 220, 100, 0.8)'; ctx.lineWidth = 2; ctx.setLineDash([10, 6]);
+          [-1, 1].forEach(side => {
+            const s = this.project3D(side * aL, aY + 12, 0), e = this.project3D(side * (aL + 150), aY + 40, 0);
+            ctx.beginPath(); ctx.moveTo(pcx + s.x, pcy + s.y); ctx.quadraticCurveTo(pcx + (s.x + e.x) / 2, pcy + s.y + 30, pcx + e.x, pcy + e.y); ctx.stroke();
+          });
+          ctx.setLineDash([]); ctx.shadowBlur = 0;
+        }
+      }
+      drawLatticeBackground(x, y, w, h) {
+        const ctx = this.ctx, cx = x + w / 2, cy = y + h / 2, t = this.time * 0.001, gs = 40;
+        const cols = Math.ceil(w / gs) + 2, rows = Math.ceil(h / gs) + 2;
+        ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+        ctx.strokeStyle = 'rgba(139, 92, 246, 0.15)'; ctx.lineWidth = 1;
+        for (let i = -rows; i < cols + rows; i++) { const o = Math.sin(t + i * 0.2) * 5; ctx.beginPath(); ctx.moveTo(x + i * gs + o, y); ctx.lineTo(x + i * gs - h + o, y + h); ctx.stroke(); }
+        for (let i = -rows; i < cols + rows; i++) { const o = Math.cos(t + i * 0.2) * 5; ctx.beginPath(); ctx.moveTo(x + i * gs + o, y); ctx.lineTo(x + i * gs + h + o, y + h); ctx.stroke(); }
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.4)';
+        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) { const pulse = Math.sin(t * 2 + i * 0.5 + j * 0.3) * 0.5 + 0.5; ctx.beginPath(); ctx.arc(x + i * gs, y + j * gs, 2 + pulse * 2, 0, Math.PI * 2); ctx.fill(); }
+        const th = h * 0.6, tbw = w * 0.15, ttw = w * 0.04, by = cy + th * 0.4, ty = cy - th * 0.4;
+        ctx.strokeStyle = 'rgba(139, 92, 246, 0.3)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx - tbw, by); ctx.lineTo(cx - ttw, ty); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + tbw, by); ctx.lineTo(cx + ttw, ty); ctx.stroke();
+        for (let i = 0; i < 6; i++) {
+          const bt = i / 6, brY = by - bt * th * 0.8, brW = tbw - bt * (tbw - ttw), a = 0.2 + Math.sin(t * 3 + i) * 0.1;
+          ctx.strokeStyle = `rgba(6, 182, 212, ${a})`; ctx.beginPath(); ctx.moveTo(cx - brW, brY); ctx.lineTo(cx + brW, brY); ctx.stroke();
+          if (i < 5) { const nt = (i + 1) / 6, nY = by - nt * th * 0.8, nW = tbw - nt * (tbw - ttw); ctx.beginPath(); ctx.moveTo(cx - brW, brY); ctx.lineTo(cx + nW, nY); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx + brW, brY); ctx.lineTo(cx - nW, nY); ctx.stroke(); }
+        }
+        ctx.fillStyle = 'rgba(139, 92, 246, 0.8)'; ctx.font = '500 14px "Inter", system-ui, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('Generating 3D Geometry' + '.'.repeat(Math.floor(t * 2) % 4), cx, by + 40);
+        ctx.restore();
+      }
+      drawPanel(x, y, w, h, title, hl = false) {
+        const ctx = this.ctx;
+        ctx.fillStyle = this.colors.bgPanel; this.roundRect(ctx, x, y, w, h, 12); ctx.fill();
+        if (hl) { ctx.shadowColor = 'rgba(6, 182, 212, 0.4)'; ctx.shadowBlur = 20; }
+        ctx.strokeStyle = hl ? this.colors.borderGlow : this.colors.borderMuted; ctx.lineWidth = hl ? 1.5 : 1; this.roundRect(ctx, x, y, w, h, 12); ctx.stroke(); ctx.shadowBlur = 0;
+        const grad = ctx.createLinearGradient(x, y, x + w, y); grad.addColorStop(0, 'rgba(139, 92, 246, 0.25)'); grad.addColorStop(0.5, 'rgba(6, 182, 212, 0.2)'); grad.addColorStop(1, 'rgba(139, 92, 246, 0.15)');
+        ctx.fillStyle = grad; this.roundRectTop(ctx, x, y, w, 32, 12); ctx.fill();
+        ctx.fillStyle = this.colors.textPrimary; ctx.font = '600 11px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText(title, x + 14, y + 21);
+        ctx.strokeStyle = this.colors.borderMuted; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(x + 1, y + 32); ctx.lineTo(x + w - 1, y + 32); ctx.stroke();
+      }
+      drawPanelNoHeader(x, y, w, h, hl = false) {
+        const ctx = this.ctx;
+        ctx.fillStyle = this.colors.bgPanel; this.roundRect(ctx, x, y, w, h, 12); ctx.fill();
+        if (hl) { ctx.shadowColor = 'rgba(6, 182, 212, 0.4)'; ctx.shadowBlur = 20; }
+        ctx.strokeStyle = hl ? this.colors.borderGlow : this.colors.borderMuted; ctx.lineWidth = hl ? 1.5 : 1; this.roundRect(ctx, x, y, w, h, 12); ctx.stroke(); ctx.shadowBlur = 0;
+      }
+      drawParameterInput(x, y, label, value, unit, active = false) {
+        const ctx = this.ctx, w = 200;
+        ctx.fillStyle = this.colors.textSecondary; ctx.font = '500 9px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText(label.toUpperCase(), x, y);
+        if (active) { ctx.shadowColor = 'rgba(6, 182, 212, 0.5)'; ctx.shadowBlur = 10; }
+        ctx.fillStyle = active ? 'rgba(6, 182, 212, 0.12)' : 'rgba(30, 40, 55, 0.9)'; this.roundRect(ctx, x, y + 4, w, 24, 6); ctx.fill();
+        ctx.strokeStyle = active ? 'rgba(6, 182, 212, 0.8)' : 'rgba(60, 80, 100, 0.5)'; ctx.lineWidth = active ? 1.5 : 0.5; this.roundRect(ctx, x, y + 4, w, 24, 6); ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.fillStyle = active ? this.colors.accentCyan : this.colors.textPrimary; ctx.font = '600 11px "SF Mono", Consolas, monospace';
+        ctx.fillText((typeof value === 'number' ? value.toFixed(1) : value) + ' ' + unit, x + 10, y + 20);
+        if (active && this.cursorBlink) { const tw = ctx.measureText((typeof value === 'number' ? value.toFixed(1) : value) + ' ' + unit).width; ctx.fillStyle = this.colors.accentCyan; ctx.fillRect(x + 12 + tw, y + 10, 2, 12); }
+      }
+      drawMiniResults(x, y, w) {
+        const ctx = this.ctx;
+        const dg = ctx.createLinearGradient(x, y - 8, x + w, y - 8); dg.addColorStop(0, 'rgba(80, 100, 130, 0.1)'); dg.addColorStop(0.5, 'rgba(80, 100, 130, 0.4)'); dg.addColorStop(1, 'rgba(80, 100, 130, 0.1)');
+        ctx.strokeStyle = dg; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x + w, y - 8); ctx.stroke();
+        ctx.fillStyle = this.colors.textSecondary; ctx.font = '600 9px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('ANALYSIS RESULTS', x, y + 5);
+        if (this.analysisResults.maxStress === 0) { ctx.fillStyle = this.colors.textMuted; ctx.font = '400 10px "Inter", system-ui, sans-serif'; ctx.fillText('Awaiting analysis...', x, y + 26); return; }
+        const res = [{ label: 'Max Stress', value: this.analysisResults.maxStress.toFixed(0) + ' MPa', ratio: this.analysisResults.maxStress / 250 }, { label: 'Utilization', value: (this.analysisResults.utilizationRatio * 100).toFixed(0) + '%', ratio: this.analysisResults.utilizationRatio }, { label: 'Weight', value: (this.analysisResults.weight / 1000).toFixed(1) + ' t', ratio: this.analysisResults.weight / 15000 }];
+        let yp = y + 26;
+        res.forEach(r => {
+          ctx.fillStyle = this.colors.textMuted; ctx.font = '400 9px "Inter", system-ui, sans-serif'; ctx.fillText(r.label, x, yp);
+          ctx.fillStyle = this.colors.textPrimary; ctx.font = '600 9px "SF Mono", Consolas, monospace'; ctx.fillText(r.value, x + 60, yp);
+          const bx = x + 115, bw = w - 120;
+          ctx.fillStyle = 'rgba(40, 50, 65, 0.8)'; this.roundRect(ctx, bx, yp - 8, bw, 6, 3); ctx.fill();
+          ctx.fillStyle = r.ratio < 0.6 ? this.colors.accentGreen : r.ratio < 0.85 ? this.colors.accentYellow : 'rgba(239, 68, 68, 1)'; this.roundRect(ctx, bx, yp - 8, bw * Math.min(1, r.ratio), 6, 3); ctx.fill();
+          yp += 22;
+        });
+        const status = this.isAnalyzing ? 'ANALYZING' : 'COMPLETE', sc = this.isAnalyzing ? this.colors.accentYellow : this.colors.accentGreen;
+        ctx.fillStyle = sc; ctx.beginPath(); ctx.arc(x + 4, yp + 8, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = sc; ctx.font = '600 9px "Inter", system-ui, sans-serif'; ctx.fillText(status, x + 14, yp + 11);
+      }
+      drawChatPanel(x, y, w, h) {
+        const ctx = this.ctx, pad = 14, mw = w - pad * 2, hh = 32;
+        ctx.fillStyle = this.colors.bgPanel; this.roundRect(ctx, x, y, w, h, 12); ctx.fill();
+        ctx.strokeStyle = this.colors.borderMuted; ctx.lineWidth = 0.5; this.roundRect(ctx, x, y, w, h, 12); ctx.stroke();
+        const hg = ctx.createLinearGradient(x, y, x + w, y); hg.addColorStop(0, 'rgba(139, 92, 246, 0.2)'); hg.addColorStop(1, 'rgba(6, 182, 212, 0.15)');
+        ctx.fillStyle = hg; this.roundRectTop(ctx, x, y, w, hh, 12); ctx.fill();
+        ctx.fillStyle = this.colors.textPrimary; ctx.font = '600 11px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('TOWER SENSAI', x + 14, y + 21);
+        ctx.fillStyle = this.colors.accentGreen; ctx.beginPath(); ctx.arc(x + w - 20, y + 16, 4, 0, Math.PI * 2); ctx.fill();
+        const phase = this.currentSequenceIndex < this.demoSequence.length ? this.demoSequence[this.currentSequenceIndex].phase : '';
+        let typingMsg = null, typingProg = 0;
+        const isAsk = ['load-ask', 'members-ask', 'bom-ask'].includes(phase);
+        if (phase === 'load-ask') typingMsg = this.chatSequence.find(m => m.type === 'user' && m.phase === 'load-focus');
+        else if (phase === 'members-ask') typingMsg = this.chatSequence.find(m => m.type === 'user' && m.phase === 'members-focus');
+        else if (phase === 'bom-ask') typingMsg = this.chatSequence.find(m => m.type === 'user' && m.phase === 'bom-focus');
+        if (typingMsg && isAsk) typingProg = Math.min(1, (this.time - this.sequenceStartTime) / (this.demoSequence[this.currentSequenceIndex].duration * 0.95));
+        const iy = y + hh + 12, ih = 44;
+        if (isAsk) { ctx.shadowColor = 'rgba(139, 92, 246, 0.5)'; ctx.shadowBlur = 15; ctx.fillStyle = 'rgba(30, 32, 40, 1)'; this.roundRect(ctx, x + pad, iy, mw, ih, 22); ctx.fill(); ctx.strokeStyle = 'rgba(139, 92, 246, 0.8)'; ctx.lineWidth = 1.5; this.roundRect(ctx, x + pad, iy, mw, ih, 22); ctx.stroke(); ctx.shadowBlur = 0; }
+        else { ctx.fillStyle = 'rgba(30, 32, 40, 0.95)'; this.roundRect(ctx, x + pad, iy, mw, ih, 22); ctx.fill(); ctx.strokeStyle = 'rgba(75, 85, 99, 0.6)'; ctx.lineWidth = 1; this.roundRect(ctx, x + pad, iy, mw, ih, 22); ctx.stroke(); }
+        ctx.textAlign = 'left';
+        if (isAsk && typingMsg) {
+          const full = typingMsg.text, vis = full.substring(0, Math.floor(full.length * typingProg));
+          ctx.fillStyle = 'rgba(245, 248, 252, 1)'; ctx.font = '400 11px "Inter", system-ui, sans-serif';
+          let dt = vis; if (ctx.measureText(dt).width > mw - 60) { while (ctx.measureText('...' + dt).width > mw - 60 && dt.length > 0) dt = dt.substring(1); dt = '...' + dt; }
+          ctx.fillText(dt, x + pad + 16, iy + 27);
+          if (this.cursorBlink) { ctx.fillStyle = 'rgba(139, 92, 246, 1)'; ctx.fillRect(x + pad + 18 + ctx.measureText(dt).width, iy + 14, 2, 16); }
+        } else { ctx.fillStyle = 'rgba(107, 114, 128, 1)'; ctx.font = '400 11px "Inter", system-ui, sans-serif'; ctx.fillText('Message Tower SensAI...', x + pad + 16, iy + 27); }
+        const bx = x + w - pad - 36, by = iy + 8, bs = 28;
+        ctx.fillStyle = isAsk && typingProg > 0.9 ? (() => { const g = ctx.createLinearGradient(bx, by, bx + bs, by + bs); g.addColorStop(0, 'rgba(139, 92, 246, 1)'); g.addColorStop(1, 'rgba(109, 62, 216, 1)'); return g; })() : 'rgba(55, 65, 81, 0.8)';
+        ctx.beginPath(); ctx.arc(bx + bs / 2, by + bs / 2, bs / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = isAsk && typingProg > 0.9 ? '#fff' : 'rgba(156, 163, 175, 0.8)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(bx + bs / 2 - 4, by + bs / 2 + 4); ctx.lineTo(bx + bs / 2, by + bs / 2 - 4); ctx.lineTo(bx + bs / 2 + 4, by + bs / 2 + 4); ctx.stroke(); ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+        // Messages
+        const ctop = iy + ih + 15, cbot = y + h - 15, ch = cbot - ctop;
+        const calcH = m => m.type === 'user' ? (() => { ctx.font = '400 10px "Inter", system-ui, sans-serif'; let lines = [], cl = ''; m.text.split(' ').forEach(w => { if (ctx.measureText(cl + w + ' ').width > mw - 40) { lines.push(cl.trim()); cl = w + ' '; } else cl += w + ' '; }); if (cl.trim()) lines.push(cl.trim()); return lines.length * 15 + 30; })() : m.bullets.length * 16 + 52;
+        let msgs = [...this.displayedChatMessages].slice(-3), th = 0; msgs.forEach(m => th += calcH(m));
+        let so = th > ch ? th - ch : 0, yp = ctop - so;
+        ctx.save(); ctx.beginPath(); ctx.rect(x, ctop, w, ch); ctx.clip();
+        msgs.forEach(m => {
+          const mh = calcH(m); if (yp + mh < ctop) { yp += mh; return; } if (yp > cbot) return;
+          if (m.type === 'user') {
+            ctx.font = '400 10px "Inter", system-ui, sans-serif'; let lines = [], cl = ''; m.text.split(' ').forEach(wd => { if (ctx.measureText(cl + wd + ' ').width > mw - 40) { lines.push(cl.trim()); cl = wd + ' '; } else cl += wd + ' '; }); if (cl.trim()) lines.push(cl.trim());
+            const bh = lines.length * 15 + 20, bw = Math.min(mw - 20, Math.max(...lines.map(l => ctx.measureText(l).width)) + 24), bbx = x + w - pad - bw;
+            ctx.fillStyle = 'rgba(55, 65, 81, 0.9)'; this.roundRect(ctx, bbx, yp, bw, bh, 12); ctx.fill();
+            ctx.fillStyle = 'rgba(240, 245, 250, 1)'; ctx.font = '400 10px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; lines.forEach((ln, i) => ctx.fillText(ln, bbx + 12, yp + 16 + i * 15));
+            yp += bh + 10;
+          } else {
+            const bh = m.bullets.length * 16 + 42;
+            ctx.fillStyle = 'rgba(139, 92, 246, 0.1)'; this.roundRect(ctx, x + pad, yp, mw, bh, 10); ctx.fill();
+            ctx.strokeStyle = 'rgba(139, 92, 246, 0.25)'; ctx.lineWidth = 0.5; this.roundRect(ctx, x + pad, yp, mw, bh, 10); ctx.stroke();
+            ctx.fillStyle = 'rgba(139, 92, 246, 0.8)'; this.roundRect(ctx, x + pad + 8, yp + 6, 50, 14, 4); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = '600 7px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('SENSAI', x + pad + 13, yp + 16);
+            ctx.fillStyle = this.colors.textPrimary; ctx.font = '600 9px "Inter", system-ui, sans-serif'; ctx.fillText(m.title, x + pad + 10, yp + 32);
+            ctx.fillStyle = this.colors.textSecondary; ctx.font = '400 8px "Inter", system-ui, sans-serif'; m.bullets.forEach((b, i) => ctx.fillText('• ' + b, x + pad + 12, yp + 44 + i * 16));
+            yp += bh + 10;
+          }
+        });
+        ctx.restore();
+      }
+      drawInputBoxOnly(x, y, w, h) {
+        const ctx = this.ctx, pad = 14, mw = w - pad * 2, hh = 32;
+        const phase = this.currentSequenceIndex < this.demoSequence.length ? this.demoSequence[this.currentSequenceIndex].phase : '';
+        let typingMsg = null, typingProg = 0;
+        if (phase === 'load-ask') typingMsg = this.chatSequence.find(m => m.type === 'user' && m.phase === 'load-focus');
+        else if (phase === 'members-ask') typingMsg = this.chatSequence.find(m => m.type === 'user' && m.phase === 'members-focus');
+        else if (phase === 'bom-ask') typingMsg = this.chatSequence.find(m => m.type === 'user' && m.phase === 'bom-focus');
+        if (typingMsg) typingProg = Math.min(1, (this.time - this.sequenceStartTime) / (this.demoSequence[this.currentSequenceIndex].duration * 0.95));
+        const iy = y + hh + 12, ih = 44;
+        ctx.shadowColor = 'rgba(139, 92, 246, 0.6)'; ctx.shadowBlur = 20; ctx.fillStyle = 'rgba(30, 32, 40, 1)'; this.roundRect(ctx, x + pad, iy, mw, ih, 22); ctx.fill();
+        ctx.strokeStyle = 'rgba(139, 92, 246, 0.9)'; ctx.lineWidth = 2; this.roundRect(ctx, x + pad, iy, mw, ih, 22); ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.textAlign = 'left';
+        if (typingMsg) {
+          const full = typingMsg.text, vis = full.substring(0, Math.floor(full.length * typingProg));
+          ctx.fillStyle = 'rgba(245, 248, 252, 1)'; ctx.font = '400 11px "Inter", system-ui, sans-serif';
+          let dt = vis; if (ctx.measureText(dt).width > mw - 60) { while (ctx.measureText('...' + dt).width > mw - 60 && dt.length > 0) dt = dt.substring(1); dt = '...' + dt; }
+          ctx.fillText(dt, x + pad + 16, iy + 27);
+          if (this.cursorBlink) { ctx.fillStyle = 'rgba(139, 92, 246, 1)'; ctx.fillRect(x + pad + 18 + ctx.measureText(dt).width, iy + 14, 2, 16); }
+        }
+        const bx = x + w - pad - 36, by = iy + 8, bs = 28;
+        ctx.fillStyle = typingProg > 0.9 ? (() => { const g = ctx.createLinearGradient(bx, by, bx + bs, by + bs); g.addColorStop(0, 'rgba(139, 92, 246, 1)'); g.addColorStop(1, 'rgba(109, 62, 216, 1)'); return g; })() : 'rgba(55, 65, 81, 0.8)';
+        ctx.beginPath(); ctx.arc(bx + bs / 2, by + bs / 2, bs / 2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = typingProg > 0.9 ? '#fff' : 'rgba(156, 163, 175, 0.8)'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(bx + bs / 2 - 4, by + bs / 2 + 4); ctx.lineTo(bx + bs / 2, by + bs / 2 - 4); ctx.lineTo(bx + bs / 2 + 4, by + bs / 2 + 4); ctx.stroke(); ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+      }
+      drawCameraIndicator(x, y, w) {
+        const ctx = this.ctx, cam = this.cameraSequence[this.currentCameraIndex];
+        ctx.fillStyle = 'rgba(15, 20, 30, 0.95)'; this.roundRect(ctx, x, y - 12, w, 50, 10); ctx.fill();
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.4)'; ctx.lineWidth = 1; this.roundRect(ctx, x, y - 12, w, 50, 10); ctx.stroke();
+        ctx.fillStyle = 'rgba(139, 92, 246, 0.3)'; this.roundRect(ctx, x + 12, y - 2, 45, 20, 5); ctx.fill();
+        ctx.fillStyle = this.colors.accentPurple; ctx.font = '700 10px "SF Mono", Consolas, monospace'; ctx.textAlign = 'center'; ctx.fillText(`${this.currentCameraIndex + 1} / ${this.cameraSequence.length}`, x + 34, y + 12);
+        ctx.fillStyle = this.colors.textPrimary; ctx.font = '600 12px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText(cam.label, x + 68, y + 12);
+        ctx.fillStyle = this.colors.accentCyan; ctx.font = '500 10px "Inter", system-ui, sans-serif'; ctx.fillText(cam.tooltip, x + 68, y + 28);
+        const pbx = x + w - 140, pbw = 120, prog = (this.currentCameraIndex + 1) / this.cameraSequence.length;
+        ctx.fillStyle = this.colors.textMuted; ctx.font = '500 8px "Inter", system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.fillText('PROGRESS', x + w - 15, y + 5);
+        ctx.fillStyle = 'rgba(50, 60, 75, 0.6)'; this.roundRect(ctx, pbx, y + 12, pbw, 8, 4); ctx.fill();
+        const pg = ctx.createLinearGradient(pbx, 0, pbx + pbw, 0); pg.addColorStop(0, 'rgba(139, 92, 246, 1)'); pg.addColorStop(1, 'rgba(6, 182, 212, 1)');
+        ctx.fillStyle = pg; this.roundRect(ctx, pbx, y + 12, pbw * prog, 8, 4); ctx.fill();
+        ctx.fillStyle = this.colors.textSecondary; ctx.font = '600 9px "SF Mono", Consolas, monospace'; ctx.textAlign = 'right'; ctx.fillText(Math.round(prog * 100) + '%', x + w - 15, y + 28);
+      }
+      drawMembersView(cx, cy, w, h) {
+        const ctx = this.ctx, tx = cx - w / 2 + 20, ty = cy - h / 2 + 30, tw = w - 40, rh = 28;
+        const hg = ctx.createLinearGradient(tx, ty, tx + tw, ty); hg.addColorStop(0, 'rgba(139, 92, 246, 0.3)'); hg.addColorStop(1, 'rgba(6, 182, 212, 0.2)');
+        ctx.fillStyle = hg; this.roundRectTop(ctx, tx, ty, tw, 36, 8); ctx.fill();
+        ctx.fillStyle = this.colors.textPrimary; ctx.font = '600 11px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('STRUCTURAL MEMBERS', tx + 15, ty + 23);
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.2)'; this.roundRect(ctx, tx + tw - 180, ty + 8, 80, 20, 4); ctx.fill();
+        ctx.fillStyle = this.colors.accentCyan; ctx.font = '600 9px "SF Mono", Consolas, monospace'; ctx.fillText('100 PCS', tx + tw - 155, ty + 22);
+        ctx.fillStyle = 'rgba(139, 92, 246, 0.2)'; this.roundRect(ctx, tx + tw - 90, ty + 8, 75, 20, 4); ctx.fill();
+        ctx.fillStyle = this.colors.accentPurple; ctx.fillText('10,820 kg', tx + tw - 78, ty + 22);
+        const chy = ty + 45;
+        ctx.fillStyle = 'rgba(25, 32, 45, 0.9)'; ctx.fillRect(tx, chy, tw, 26);
+        ctx.fillStyle = this.colors.textSecondary; ctx.font = '600 9px "Inter", system-ui, sans-serif';
+        ctx.fillText('ID', tx + 15, chy + 17); ctx.fillText('TYPE', tx + 60, chy + 17); ctx.fillText('SECTION', tx + 150, chy + 17); ctx.fillText('MATERIAL', tx + 260, chy + 17); ctx.fillText('LENGTH', tx + 340, chy + 17); ctx.fillText('QTY', tx + 410, chy + 17); ctx.fillText('WEIGHT', tx + 460, chy + 17);
+        const vis = Math.min(Math.floor(this.memberAnimationProgress * this.towerMembers.length), 10);
+        for (let i = 0; i < vis; i++) {
+          const m = this.towerMembers[i], ry = chy + 26 + i * rh, hl = i === this.highlightedMember;
+          ctx.fillStyle = hl ? 'rgba(6, 182, 212, 0.12)' : i % 2 === 0 ? 'rgba(30, 40, 55, 0.6)' : 'rgba(25, 35, 50, 0.6)'; ctx.fillRect(tx, ry, tw, rh);
+          ctx.fillStyle = hl ? this.colors.accentCyan : this.colors.textSecondary; ctx.font = '500 10px "SF Mono", Consolas, monospace'; ctx.fillText(m.id, tx + 15, ry + 18);
+          ctx.fillStyle = this.colors.textSecondary; ctx.font = '400 10px "Inter", system-ui, sans-serif'; ctx.fillText(m.type, tx + 60, ry + 18);
+          ctx.font = '500 10px "SF Mono", Consolas, monospace'; ctx.fillStyle = this.colors.textMuted;
+          ctx.fillText(m.section, tx + 150, ry + 18); ctx.fillText(m.material, tx + 260, ry + 18); ctx.fillText(m.length.toFixed(1) + 'm', tx + 340, ry + 18); ctx.fillText(m.qty.toString(), tx + 410, ry + 18);
+          ctx.fillStyle = hl ? this.colors.accentCyan : this.colors.textPrimary; ctx.font = '600 10px "SF Mono", Consolas, monospace'; ctx.fillText((m.weight * m.qty) + ' kg', tx + 460, ry + 18);
+        }
+        ctx.strokeStyle = this.colors.borderMuted; ctx.lineWidth = 0.5; this.roundRect(ctx, tx, ty, tw, 36 + 26 + 10 * rh, 8); ctx.stroke();
+      }
+      drawBOMView(cx, cy, w, h) {
+        const ctx = this.ctx, ap = this.bomAnimationProgress, tw = Math.min(w - 40, 460), tx = cx - tw / 2, ty = cy - h / 2 + 20, mth = Math.min(h - 50, 380);
+        ctx.fillStyle = 'rgba(35, 40, 55, 0.95)'; this.roundRect(ctx, tx, ty, tw, mth, 8); ctx.fill();
+        ctx.strokeStyle = 'rgba(80, 100, 130, 0.5)'; ctx.lineWidth = 1; this.roundRect(ctx, tx, ty, tw, mth, 8); ctx.stroke();
+        const ha = Math.min(1, ap * 5);
+        const hg = ctx.createLinearGradient(tx, ty, tx + tw, ty); hg.addColorStop(0, `rgba(139, 92, 246, ${0.25 * ha})`); hg.addColorStop(1, `rgba(6, 182, 212, ${0.2 * ha})`);
+        ctx.fillStyle = hg; this.roundRectTop(ctx, tx, ty, tw, 40, 8); ctx.fill();
+        ctx.globalAlpha = ha;
+        ctx.fillStyle = this.colors.textPrimary; ctx.font = '700 11px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.fillText('BILL OF MATERIALS', tx + 15, ty + 16);
+        ctx.fillStyle = this.colors.textMuted; ctx.font = '400 8px "Inter", system-ui, sans-serif'; ctx.fillText('Tower T-142 • 230kV Coastal Line', tx + 15, ty + 30);
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.15)'; this.roundRect(ctx, tx + tw - 170, ty + 10, 70, 18, 4); ctx.fill();
+        ctx.fillStyle = this.colors.accentCyan; ctx.font = '600 8px "SF Mono", Consolas, monospace'; ctx.fillText('10,820 kg', tx + tw - 158, ty + 22);
+        ctx.fillStyle = 'rgba(139, 92, 246, 0.15)'; this.roundRect(ctx, tx + tw - 90, ty + 10, 75, 18, 4); ctx.fill();
+        ctx.fillStyle = this.colors.accentPurple; ctx.fillText('100 MEMBERS', tx + tw - 82, ty + 22);
+        ctx.globalAlpha = 1;
+        const hy = ty + 48, tha = Math.min(1, ap * 3); ctx.globalAlpha = tha;
+        ctx.fillStyle = 'rgba(25, 32, 45, 0.9)'; ctx.fillRect(tx + 1, hy, tw - 2, 24);
+        ctx.fillStyle = this.colors.textSecondary; ctx.font = '600 8px "Inter", system-ui, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText('ITEM', tx + 12, hy + 16); ctx.fillText('DESCRIPTION', tx + 55, hy + 16); ctx.fillText('SECTION', tx + 170, hy + 16); ctx.fillText('QTY', tx + 260, hy + 16); ctx.fillText('WEIGHT', tx + 300, hy + 16);
+        ctx.globalAlpha = 1;
+        const bom = [{ item: 'L1-01', desc: 'Main Leg - Lower', section: 'L150×150×15', qty: '4', totalWt: '1,060 kg' }, { item: 'L2-01', desc: 'Main Leg - Mid', section: 'L130×130×12', qty: '4', totalWt: '740 kg' }, { item: 'L3-01', desc: 'Main Leg - Upper', section: 'L100×100×10', qty: '4', totalWt: '472 kg' }, { item: 'D1-01', desc: 'Primary Diagonal', section: 'L75×75×6', qty: '24', totalWt: '672 kg' }, { item: 'D2-01', desc: 'Secondary Diagonal', section: 'L65×65×5', qty: '32', totalWt: '608 kg' }, { item: 'H1-01', desc: 'Horizontal - Primary', section: 'L60×60×5', qty: '8', totalWt: '280 kg' }, { item: 'H2-01', desc: 'Horizontal - Secondary', section: 'L50×50×4', qty: '12', totalWt: '264 kg' }];
+        const rh = 22, vis = Math.min(7, Math.floor(ap * (bom.length + 2)));
+        for (let i = 0; i < vis; i++) {
+          const it = bom[i]; if (!it) continue;
+          const ry = hy + 24 + i * rh, rp = Math.min(1, (ap * (bom.length + 2) - i) * 2); ctx.globalAlpha = rp;
+          ctx.fillStyle = i % 2 === 0 ? 'rgba(30, 38, 52, 0.6)' : 'rgba(35, 43, 58, 0.6)'; ctx.fillRect(tx + 3, ry, tw - 6, rh);
+          if (i === vis - 1 && rp < 1) { ctx.fillStyle = 'rgba(6, 182, 212, 0.15)'; ctx.fillRect(tx + 3, ry, tw - 6, rh); }
+          const hl = i === vis - 1 && rp < 1;
+          ctx.font = '500 9px "SF Mono", Consolas, monospace'; ctx.fillStyle = hl ? this.colors.accentCyan : this.colors.textSecondary; ctx.fillText(it.item, tx + 12, ry + 15);
+          ctx.font = '400 9px "Inter", system-ui, sans-serif'; ctx.fillStyle = this.colors.textSecondary; ctx.fillText(it.desc, tx + 55, ry + 15);
+          ctx.font = '500 9px "SF Mono", Consolas, monospace'; ctx.fillStyle = this.colors.textMuted; ctx.fillText(it.section, tx + 170, ry + 15); ctx.fillText(it.qty, tx + 260, ry + 15);
+          ctx.fillStyle = hl ? this.colors.accentCyan : this.colors.textPrimary; ctx.font = '600 9px "SF Mono", Consolas, monospace'; ctx.fillText(it.totalWt, tx + 300, ry + 15);
+        }
+        ctx.globalAlpha = 1;
+        const fa = Math.max(0, (ap - 0.7) * 3.33);
+        if (fa > 0) {
+          ctx.globalAlpha = fa; const fy = hy + 24 + 7 * rh + 8;
+          ctx.strokeStyle = 'rgba(80, 100, 130, 0.3)'; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(tx + 10, fy); ctx.lineTo(tx + tw - 10, fy); ctx.stroke();
+          ctx.fillStyle = this.colors.textSecondary; ctx.font = '600 9px "Inter", system-ui, sans-serif'; ctx.textAlign = 'right'; ctx.fillText('GRAND TOTAL:', tx + 270, fy + 18);
+          ctx.fillStyle = this.colors.accentCyan; ctx.font = '700 11px "SF Mono", Consolas, monospace'; ctx.fillText('10,820 kg', tx + tw - 20, fy + 18);
+          ctx.textAlign = 'left'; ['CSV', 'PDF', 'Print'].forEach((l, i) => { const bx = tx + 12 + i * 55; ctx.fillStyle = 'rgba(139, 92, 246, 0.15)'; this.roundRect(ctx, bx, fy + 6, 48, 20, 4); ctx.fill(); ctx.fillStyle = this.colors.textMuted; ctx.font = '500 8px "Inter", system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(l, bx + 24, fy + 19); });
+          ctx.globalAlpha = 1;
+        }
+      }
+      animate() {
+        const now = performance.now(); this.time = now;
+        if (now - this.lastCursorBlink > 500) { this.cursorBlink = !this.cursorBlink; this.lastCursorBlink = now; }
+        const bg = this.ctx.createRadialGradient(this.width / 2, this.height / 2, 0, this.width / 2, this.height / 2, this.width * 0.8);
+        bg.addColorStop(0, '#0f1219'); bg.addColorStop(1, '#080a0e'); this.ctx.fillStyle = bg; this.ctx.fillRect(0, 0, this.width, this.height);
+        this.updateDemo();
+        const ox = (this.width - 1140) / 2, oy = (this.height - 620) / 2;
+        const panels = { parameters: { x: ox + 20, y: oy + 60, width: 230, height: 540 }, main: { x: ox + 270, y: oy + 60, width: 540, height: 540 }, chat: { x: ox + 830, y: oy + 60, width: 290, height: 540 } };
+        const phase = this.currentSequenceIndex < this.demoSequence.length ? this.demoSequence[this.currentSequenceIndex].phase : '';
+        const isTyping = ['load-ask', 'members-ask', 'bom-ask'].includes(phase);
+        const isMainFocused = ['members-show', 'members-calc', 'bom-show'].includes(phase) || (!isTyping && ['init', 'height', 'base', 'top', 'crossarms', 'voltage', 'wind', 'ice', 'analyze', 'complete', 'load-focus', 'members-focus', 'bom-focus'].includes(phase));
+        // Parameters panel
+        this.ctx.globalAlpha = 0.25;
+        this.drawPanel(panels.parameters.x, panels.parameters.y, panels.parameters.width, panels.parameters.height, '◆ PARAMETERS', ['height', 'base', 'top', 'crossarms', 'voltage', 'wind', 'ice'].includes(phase));
+        let py = panels.parameters.y + 45; const px = panels.parameters.x + 12;
+        this.drawParameterInput(px, py, 'Tower Height', this.params.height, 'm', phase === 'height'); py += 36;
+        this.drawParameterInput(px, py, 'Base Width', this.params.baseWidth, 'm', phase === 'base'); py += 36;
+        this.drawParameterInput(px, py, 'Top Width', this.params.topWidth, 'm', phase === 'top'); py += 36;
+        this.drawParameterInput(px, py, 'Cross-Arms', this.params.crossArmCount, '', phase === 'crossarms'); py += 36;
+        this.drawParameterInput(px, py, 'Voltage', this.params.voltage, 'kV', phase === 'voltage'); py += 36;
+        this.drawParameterInput(px, py, 'Wind Speed', this.params.windSpeed, 'm/s', phase === 'wind'); py += 36;
+        this.drawParameterInput(px, py, 'Ice Load', this.params.iceThickness, 'mm', phase === 'ice'); py += 36;
+        this.drawParameterInput(px, py, 'Span', this.params.spanLength, 'm', false); py += 36;
+        this.drawParameterInput(px, py, 'Safety Factor', this.params.safetyFactor, '', false); py += 45;
+        this.drawMiniResults(px, py, panels.parameters.width - 24);
+        this.ctx.globalAlpha = 1;
+        // Main panel
+        if (isTyping) this.ctx.globalAlpha = 0.25;
+        this.drawPanelNoHeader(panels.main.x, panels.main.y, panels.main.width, panels.main.height, isMainFocused);
+        const vcx = panels.main.x + panels.main.width / 2, vcy = panels.main.y + panels.main.height / 2;
+        this.ctx.save(); this.ctx.beginPath(); this.ctx.rect(panels.main.x + 5, panels.main.y + 5, panels.main.width - 10, panels.main.height - 10); this.ctx.clip();
+        if (phase === 'load-ask' || phase === 'init') this.drawLatticeBackground(panels.main.x + 5, panels.main.y + 5, panels.main.width - 10, panels.main.height - 10);
+        else if (this.currentScreen === 'design') this.draw3DTower(vcx, vcy + 70, 1);
+        else if (this.currentScreen === 'members') this.drawMembersView(vcx, vcy, panels.main.width - 20, panels.main.height - 20);
+        else if (this.currentScreen === 'bom') this.drawBOMView(vcx, vcy, panels.main.width - 20, panels.main.height - 20);
+        this.ctx.restore();
+        if (this.currentScreen === 'design' && !isTyping) this.drawCameraIndicator(panels.main.x + 15, panels.main.y + panels.main.height - 55, panels.main.width - 30);
+        this.ctx.globalAlpha = 1;
+        // Chat panel
+        this.ctx.globalAlpha = 0.25; this.drawChatPanel(panels.chat.x, panels.chat.y, panels.chat.width, panels.chat.height); this.ctx.globalAlpha = 1;
+        if (isTyping) this.drawInputBoxOnly(panels.chat.x, panels.chat.y, panels.chat.width, panels.chat.height);
+        // Title bar
+        this.ctx.fillStyle = 'rgba(12, 16, 24, 0.98)'; this.ctx.fillRect(0, 0, this.width, 48);
+        const bg2 = this.ctx.createLinearGradient(0, 48, this.width, 48); bg2.addColorStop(0, 'rgba(139, 92, 246, 0.3)'); bg2.addColorStop(0.5, 'rgba(6, 182, 212, 0.4)'); bg2.addColorStop(1, 'rgba(139, 92, 246, 0.3)');
+        this.ctx.strokeStyle = bg2; this.ctx.lineWidth = 1; this.ctx.beginPath(); this.ctx.moveTo(0, 48); this.ctx.lineTo(this.width, 48); this.ctx.stroke();
+        const lg = this.ctx.createLinearGradient(ox + 20, 0, ox + 200, 0); lg.addColorStop(0, '#a78bfa'); lg.addColorStop(1, '#22d3ee');
+        this.ctx.fillStyle = lg; this.ctx.font = '700 16px "Inter", system-ui, sans-serif'; this.ctx.textAlign = 'left'; this.ctx.fillText('Tower SensAI', ox + 20, 30);
+        this.ctx.fillStyle = this.colors.textMuted; this.ctx.font = '400 11px "Inter", system-ui, sans-serif'; this.ctx.fillText('Design Studio', ox + 125, 30);
+        this.ctx.fillStyle = 'rgba(139, 92, 246, 0.15)'; this.roundRect(this.ctx, ox + 200, 14, 200, 22, 6); this.ctx.fill();
+        this.ctx.strokeStyle = 'rgba(139, 92, 246, 0.3)'; this.ctx.lineWidth = 0.5; this.roundRect(this.ctx, ox + 200, 14, 200, 22, 6); this.ctx.stroke();
+        this.ctx.fillStyle = this.colors.textSecondary; this.ctx.font = '500 10px "SF Mono", Consolas, monospace'; this.ctx.fillText('230kV Coastal Line - T-142', ox + 212, 29);
+        [{ color: 'rgba(239, 68, 68, 1)', x: 75 }, { color: 'rgba(250, 204, 21, 1)', x: 52 }, { color: 'rgba(34, 197, 94, 1)', x: 29 }].forEach(b => { this.ctx.fillStyle = b.color; this.ctx.beginPath(); this.ctx.arc(this.width - b.x, 24, 6, 0, Math.PI * 2); this.ctx.fill(); });
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => { const c = document.getElementById('towerCanvas'); if (c) new TowerEngineeringDemo(c); });
+  </script>
+</body>
+</html>

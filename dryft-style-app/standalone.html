@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dryft - Reliability for the Grid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #FDFCFC;
+      color: #264AFF;
+      background-image: url(https://framerusercontent.com/images/qBN8aOrvBxJY1psOPRzjUkKOQc.png);
+      background-size: 500px;
+      background-repeat: repeat;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background: rgba(38, 74, 255, 0.2);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f0f0f0;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #264AFF;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #1a3ad4;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 50;
+      background-color: transparent;
+      background-image: url(https://framerusercontent.com/images/qBN8aOrvBxJY1psOPRzjUkKOQc.png);
+      background-size: 500px;
+      background-repeat: repeat;
+    }
+
+    .nav-container {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #000;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+      }
+    }
+
+    .nav-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #000;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .nav-link:hover {
+      opacity: 0.6;
+    }
+
+    .btn-nav {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid #000;
+      background: transparent;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #000;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-nav:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 6rem 1.5rem 8rem;
+    }
+
+    @media (min-width: 1024px) {
+      .hero {
+        padding: 6rem 3rem 8rem;
+      }
+    }
+
+    .hero-container {
+      max-width: 80rem;
+      margin: 0 auto;
+      display: grid;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    @media (min-width: 1024px) {
+      .hero-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .hero h1 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 500;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 b i {
+      font-weight: 700;
+      font-style: italic;
+    }
+
+    .hero-text {
+      font-size: 1.125rem;
+      color: rgba(38, 74, 255, 0.7);
+      margin-bottom: 2rem;
+      max-width: 32rem;
+      line-height: 1.7;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 1.5rem;
+      background: #264AFF;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #1a3ad4;
+    }
+
+    .btn-secondary {
+      padding: 0.75rem 1.5rem;
+      border: 1px solid rgba(38, 74, 255, 0.3);
+      color: #264AFF;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(38, 74, 255, 0.1);
+    }
+
+    /* Terminal Demo */
+    .terminal-wrapper {
+      position: relative;
+    }
+
+    .terminal-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      background-image: url(https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=600&fit=crop);
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.3);
+    }
+
+    .terminal {
+      position: relative;
+      z-index: 10;
+      background: rgba(245, 245, 245, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(38, 74, 255, 0.2);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.875rem;
+    }
+
+    .terminal-header {
+      background: #EEEEF0;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(38, 74, 255, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .terminal-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-dot.red { background: #ff5f57; }
+    .terminal-dot.yellow { background: #febc2e; }
+    .terminal-dot.green { background: #28c840; }
+
+    .terminal-title {
+      margin-left: 1rem;
+      font-size: 0.75rem;
+      color: rgba(38, 74, 255, 0.5);
+    }
+
+    .terminal-content {
+      padding: 1.5rem;
+      min-height: 300px;
+    }
+
+    .terminal-line {
+      margin-bottom: 0.75rem;
+      opacity: 0;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .terminal-line.system { color: rgba(38, 74, 255, 0.5); }
+    .terminal-line.success { color: #22C55E; margin-left: 0.5rem; display: inline; }
+    .terminal-line.ai-label { color: rgba(38, 74, 255, 0.6); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 1rem; }
+    .terminal-line.ai { color: #264AFF; }
+    .terminal-line.action { color: #22C55E; display: flex; align-items: center; gap: 0.5rem; }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: #264AFF;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Manifesto Section */
+    .manifesto {
+      padding: 8rem 1.5rem;
+      border-top: 1px solid rgba(38, 74, 255, 0.2);
+    }
+
+    @media (min-width: 1024px) {
+      .manifesto {
+        padding: 8rem 3rem;
+      }
+    }
+
+    .manifesto-container {
+      max-width: 56rem;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #264AFF;
+    }
+
+    .section-label-line {
+      width: 3rem;
+      height: 1px;
+      background: #264AFF;
+    }
+
+    .manifesto h2 {
+      font-size: 1.875rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 2rem;
+    }
+
+    @media (min-width: 640px) {
+      .manifesto h2 {
+        font-size: 2.25rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .manifesto h2 {
+        font-size: 3rem;
+      }
+    }
+
+    .manifesto-text {
+      font-size: 1.125rem;
+      color: rgba(38, 74, 255, 0.8);
+      line-height: 1.7;
+    }
+
+    .manifesto-text p {
+      margin-bottom: 1.5rem;
+    }
+
+    /* Agents Section (Scroll-based) */
+    .agents {
+      padding: 4rem 1.5rem;
+      background: rgba(38, 74, 255, 0.95);
+      color: #fff;
+    }
+
+    @media (min-width: 1024px) {
+      .agents {
+        padding: 4rem 3rem;
+      }
+    }
+
+    .agents-container {
+      max-width: 72rem;
+      margin: 0 auto;
+      display: grid;
+      gap: 3rem;
+    }
+
+    @media (min-width: 1024px) {
+      .agents-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .agents-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .module-section {
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 0;
+      transition: opacity 0.5s;
+    }
+
+    .module-section.inactive {
+      opacity: 0.3;
+    }
+
+    .module-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .module-dot {
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .module-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .module-title {
+        font-size: 3rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .module-title {
+        font-size: 3.75rem;
+      }
+    }
+
+    .module-text {
+      font-size: 1.25rem;
+      font-weight: 500;
+      line-height: 1.4;
+      text-transform: uppercase;
+      max-width: 28rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+
+    .module-stats {
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .stat-value {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Sticky Image */
+    .agents-right {
+      display: none;
+      position: sticky;
+      top: 8rem;
+      height: 60vh;
+    }
+
+    @media (min-width: 1024px) {
+      .agents-right {
+        display: block;
+      }
+    }
+
+    .sticky-image-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+
+    .sticky-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.7s;
+    }
+
+    .sticky-image.hidden {
+      opacity: 0;
+    }
+
+    .image-label {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    /* Solutions Section */
+    .solutions {
+      position: relative;
+      padding: 8rem 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .solutions {
+        padding: 8rem 6rem;
+      }
+    }
+
+    .ascii-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: 0.1;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ascii-art {
+      font-family: 'Fragment Mono', monospace;
+      font-size: 6px;
+      color: #264AFF;
+      white-space: pre;
+      line-height: 1;
+    }
+
+    @media (min-width: 640px) {
+      .ascii-art { font-size: 8px; }
+    }
+
+    @media (min-width: 768px) {
+      .ascii-art { font-size: 10px; }
+    }
+
+    .solutions-container {
+      position: relative;
+      z-index: 10;
+      max-width: 72rem;
+      margin: 0 auto;
+      display: grid;
+      gap: 6rem;
+    }
+
+    @media (min-width: 1024px) {
+      .solutions-container {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+      }
+    }
+
+    .solutions-left h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #264AFF;
+      margin-bottom: 3rem;
+    }
+
+    .solutions-left h3 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: #264AFF;
+    }
+
+    @media (min-width: 768px) {
+      .solutions-left h3 {
+        font-size: 4.5rem;
+      }
+    }
+
+    .solutions-right {
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+    }
+
+    .solution-item h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(38, 74, 255, 0.4);
+      margin-bottom: 1rem;
+    }
+
+    .solution-item p {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #264AFF;
+    }
+
+    /* Hiring Section */
+    .hiring {
+      padding: 6rem 1.5rem;
+      border-top: 1px solid rgba(38, 74, 255, 0.2);
+    }
+
+    @media (min-width: 1024px) {
+      .hiring {
+        padding: 6rem 3rem;
+      }
+    }
+
+    .hiring-container {
+      max-width: 48rem;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hiring-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: rgba(38, 74, 255, 0.6);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .hiring h2 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .hiring h2 {
+        font-size: 3rem;
+      }
+    }
+
+    .hiring-text {
+      font-size: 1.125rem;
+      color: rgba(38, 74, 255, 0.7);
+      max-width: 36rem;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+
+    .btn-careers {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #264AFF;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .btn-careers:hover {
+      background: #1a3ad4;
+    }
+
+    /* CTA Section */
+    .cta {
+      padding: 8rem 1.5rem;
+      border-top: 1px solid rgba(38, 74, 255, 0.2);
+    }
+
+    @media (min-width: 1024px) {
+      .cta {
+        padding: 8rem 3rem;
+      }
+    }
+
+    .cta-container {
+      max-width: 48rem;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .cta-subtitle {
+      font-size: 1.5rem;
+      color: rgba(38, 74, 255, 0.5);
+      margin-bottom: 0.5rem;
+    }
+
+    .cta h2 {
+      font-size: 3rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    @media (min-width: 1024px) {
+      .cta h2 {
+        font-size: 3.75rem;
+      }
+    }
+
+    .btn-cta {
+      display: inline-block;
+      margin-top: 2.5rem;
+      padding: 1rem 2rem;
+      border: 1px solid #264AFF;
+      color: #264AFF;
+      font-weight: 500;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-cta:hover {
+      background: #264AFF;
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 4rem 1.5rem;
+      border-top: 1px solid rgba(38, 74, 255, 0.2);
+    }
+
+    @media (min-width: 1024px) {
+      .footer {
+        padding: 4rem 3rem;
+      }
+    }
+
+    .footer-container {
+      max-width: 80rem;
+      margin: 0 auto;
+      display: grid;
+      gap: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .footer-logo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .footer-section h4 {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #888;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-section a {
+      display: block;
+      font-size: 0.875rem;
+      color: rgba(38, 74, 255, 0.6);
+      text-decoration: none;
+      margin-bottom: 0.75rem;
+      transition: color 0.2s;
+    }
+
+    .footer-section a:hover {
+      color: #264AFF;
+    }
+
+    .footer-bottom {
+      max-width: 80rem;
+      margin: 4rem auto 0;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(38, 74, 255, 0.2);
+      text-align: center;
+    }
+
+    .footer-bottom p {
+      font-size: 0.875rem;
+      color: rgba(38, 74, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-container">
+      <div class="logo">LOGO</div>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="#manifesto" class="nav-link">Manifesto</a>
+          <a href="#team" class="nav-link">Team</a>
+          <a href="#blog" class="nav-link">Blog</a>
+          <a href="#careers" class="nav-link">Careers</a>
+        </div>
+        <button class="btn-nav">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <div>
+        <h1>
+          Reliability for the <b><i>Grid</i></b>. <br>
+          Power for <b><i>Data Centers</i></b>.
+        </h1>
+        <p class="hero-text">
+          We provide the agentic intelligence to plan energy infrastructure and orchestrate the power demands of data center. Decision science for the new energy era
+        </p>
+        <div class="hero-buttons">
+          <button class="btn-primary">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            Watch Video
+          </button>
+          <button class="btn-secondary">Request Demo</button>
+        </div>
+      </div>
+
+      <div class="terminal-wrapper">
+        <div class="terminal-bg"></div>
+        <div class="terminal">
+          <div class="terminal-header">
+            <div class="terminal-dot red"></div>
+            <div class="terminal-dot yellow"></div>
+            <div class="terminal-dot green"></div>
+            <span class="terminal-title">hugo-terminal</span>
+          </div>
+          <div class="terminal-content" id="terminal-content">
+            <!-- Terminal lines will be animated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Manifesto Section -->
+  <section id="manifesto" class="manifesto">
+    <div class="manifesto-container">
+      <span class="section-label">
+        <span class="section-label-line"></span>
+        Manifesto
+      </span>
+      <h2>The grid is evolving. So must the tools that build it.</h2>
+      <div class="manifesto-text">
+        <p>
+          For decades, infrastructure planning has relied on manual processes, static models, and siloed expertise. Engineers spend months on feasibility studies. Utilities struggle to keep pace with renewable integration. Data centers face power constraints that limit growth.
+        </p>
+        <p>
+          We believe there's a better way. By combining agentic AI with deep domain expertise, we can compress planning cycles from months to days, optimize layouts that humans would never discover, and orchestrate power flows in real-time.
+        </p>
+        <p>
+          This isn't about replacing engineers—it's about amplifying them. Giving them tools that handle the combinatorial complexity so they can focus on what matters: building reliable, sustainable infrastructure for the next century.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agents Section -->
+  <section id="agents" class="agents">
+    <div class="agents-container">
+      <div class="agents-left">
+        <div class="module-section" id="module-0" data-index="0">
+          <div class="module-label">
+            <span class="module-dot"></span>
+            Module_01: Plan
+          </div>
+          <h2 class="module-title">Automate Layouts.</h2>
+          <p class="module-text">
+            Automate transmission and solar layouts to reduce CAPEX. Our agents iterate through thousands of topology scenarios in seconds.
+          </p>
+          <div class="module-stats">
+            <div class="stat-row">
+              <span class="stat-label">Topology_Optimization</span>
+              <span class="stat-value">Active_v4.2</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">CAPEX_Alpha_Target</span>
+              <span class="stat-value">15.4% Reduction</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="module-section inactive" id="module-1" data-index="1">
+          <div class="module-label">
+            <span class="module-dot"></span>
+            Module_02: Orchestrate
+          </div>
+          <h2 class="module-title">Maximize Density.</h2>
+          <p class="module-text">
+            Balance data center power in real-time. We eliminate stranded capacity by orchestrating loads against grid volatility.
+          </p>
+          <div class="module-stats">
+            <div class="stat-row">
+              <span class="stat-label">Real_Time_Balancing</span>
+              <span class="stat-value">Synchronized</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Latency_Response</span>
+              <span class="stat-value">< 12MS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="agents-right">
+        <div class="sticky-image-container">
+          <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop" alt="Plan" class="sticky-image" id="image-0">
+          <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=400&fit=crop" alt="Orchestrate" class="sticky-image hidden" id="image-1">
+          <div class="image-label" id="image-label">Module_01: Plan</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solutions Section -->
+  <section id="solutions" class="solutions">
+    <div class="ascii-bg">
+      <pre class="ascii-art">
+                                           .::---:::.
+                                     .:=+*##%%%%%%%##*+=:.
+                                 .:+#%%%%%%%%%%%%%%%%%%%##*=:.
+                              .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*=.
+                           .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%###*=.
+                         :+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*:
+                       :*#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:
+                     .+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%+.
+                    :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+                   =#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+                  +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*
+                 +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+
+                =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+               :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+               *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+              :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+              =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=
+              *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+             .#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#.
+             .%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+             .%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+             .%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%.
+              *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+              =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#=
+              :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+               *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*
+               :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+                =%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+                 +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#+
+                  +%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*
+                   =#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+                    :#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#:
+                     .+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%+.
+                       :*#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*:
+                         :+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%##*:
+                           .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%###*=.
+                              .=*%%%%%%%%%%%%%%%%%%%%%%%%%%%%#*=.
+                                 .:+#%%%%%%%%%%%%%%%%%%%##*=:.
+                                     .:=+*##%%%%%%%##*+=:.
+                                           .::---:::.
+      </pre>
+    </div>
+    <div class="solutions-container">
+      <div class="solutions-left">
+        <span class="section-label">
+          <span class="section-label-line"></span>
+          Solutions
+        </span>
+        <h2>01 // The Engine</h2>
+        <h3>Math over <br>Marketing.</h3>
+      </div>
+      <div class="solutions-right">
+        <div class="solution-item">
+          <h4>L-SITE // PV & SUBSTATION</h4>
+          <p>Autonomous siting that respects terrain physics. Not just a layout—a calculated yield maximum.</p>
+        </div>
+        <div class="solution-item">
+          <h4>T-ROUTE // TRANSMISSION</h4>
+          <p>Generative pathing across multi-layer resistance grids. Reducing T&D losses by computing every possible path in milliseconds.</p>
+        </div>
+        <div class="solution-item">
+          <h4>TWIN-SYNC // ORCHESTRATION</h4>
+          <p>The brain for the Data Center. Physics-based simulation that handles millisecond-level load fluctuations with stochastic integrity.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hiring Section -->
+  <section id="careers" class="hiring">
+    <div class="hiring-container">
+      <span class="hiring-label">Join the Team</span>
+      <h2>We're Hiring</h2>
+      <p class="hiring-text">
+        We're looking for people with a sense of urgency and outstanding taste for great products. Our team has built everything from robots and PCBs to software with millions of downloads.
+      </p>
+      <a href="#careers" class="btn-careers">
+        View Careers
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="cta-container">
+      <p class="cta-subtitle">Your ERP doesn't think,</p>
+      <h2>Dryft does.</h2>
+      <a href="mailto:hello@dryft.ai" class="btn-cta">Get In Touch</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div>
+        <span class="footer-logo">dryft</span>
+      </div>
+      <div class="footer-section">
+        <h4>Find Us</h4>
+        <a href="#">LinkedIn</a>
+        <a href="#">X</a>
+      </div>
+      <div class="footer-section">
+        <h4>Navigate</h4>
+        <a href="#">Manifesto</a>
+        <a href="#">Team</a>
+        <a href="#">Blog</a>
+        <a href="#">Careers</a>
+        <a href="#">Imprint</a>
+        <a href="#">Terms & Conditions</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Made with ♥ in San Francisco</p>
+    </div>
+  </footer>
+
+  <script>
+    // Terminal Animation
+    const terminalLines = [
+      { type: 'system', text: '> Connecting to ERP...' },
+      { type: 'success', text: 'success' },
+      { type: 'system', text: '> Reading data...' },
+      { type: 'divider' },
+      { type: 'ai-label', text: 'Hugo AI' },
+      { type: 'ai', text: 'We have 3 late items' },
+      { type: 'ai', text: 'Thinking...' },
+      { type: 'divider' },
+      { type: 'action', text: '✦ Follow up with suppliers' },
+      { type: 'action', text: '✦ Increase safety stock by 5' },
+    ];
+
+    const terminalContent = document.getElementById('terminal-content');
+    let lineIndex = 0;
+
+    function addTerminalLine() {
+      if (lineIndex >= terminalLines.length) return;
+
+      const line = terminalLines[lineIndex];
+
+      if (line.type === 'divider') {
+        const div = document.createElement('div');
+        div.style.height = '16px';
+        terminalContent.appendChild(div);
+      } else {
+        const div = document.createElement('div');
+        div.className = `terminal-line ${line.type}`;
+        div.textContent = line.text;
+        div.style.animationDelay = '0s';
+        terminalContent.appendChild(div);
+      }
+
+      lineIndex++;
+      const delay = line.type === 'divider' ? 300 : 600;
+      setTimeout(addTerminalLine, delay);
+    }
+
+    // Start terminal animation after a short delay
+    setTimeout(addTerminalLine, 1000);
+
+    // Scroll-based module switching
+    const modules = document.querySelectorAll('.module-section');
+    const images = document.querySelectorAll('.sticky-image');
+    const imageLabel = document.getElementById('image-label');
+    const moduleLabels = ['Module_01: Plan', 'Module_02: Orchestrate'];
+
+    function handleScroll() {
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+      modules.forEach((module, index) => {
+        const rect = module.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const absoluteBottom = rect.bottom + window.scrollY;
+
+        if (scrollPosition >= absoluteTop && scrollPosition <= absoluteBottom) {
+          // Update module styles
+          modules.forEach((m, i) => {
+            if (i === index) {
+              m.classList.remove('inactive');
+            } else {
+              m.classList.add('inactive');
+            }
+          });
+
+          // Update images
+          images.forEach((img, i) => {
+            if (i === index) {
+              img.classList.remove('hidden');
+            } else {
+              img.classList.add('hidden');
+            }
+          });
+
+          // Update label
+          if (imageLabel) {
+            imageLabel.textContent = moduleLabels[index];
+          }
+        }
+      });
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial call
+  </script>
+</body>
+</html>
